@@ -92,7 +92,7 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 @import '../../styles/var';
 
 .nova-ui-checkbox {
@@ -107,8 +107,10 @@ export default {
   &:focus {
     outline: none;
 
-    .nova-ui-checkbox-input {
-      border: 1px solid #ee3388;
+    &:not(.is-disabled) {
+      .nova-ui-checkbox-input {
+        border: 1px solid #ee3388;
+      }
     }
   }
 

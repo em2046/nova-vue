@@ -22,7 +22,7 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 .nova-ui-select-option-group {
 }
 
@@ -32,7 +32,7 @@ export default {
 }
 
 .nova-ui-select-option-group-content {
-  /deep/ .nova-ui-select-option {
+  .nova-ui-select-option {
     padding-left: 20px;
   }
 }

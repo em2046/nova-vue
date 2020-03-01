@@ -40,7 +40,7 @@ export default {
     },
     popoverClass: {
       type: [String, Array, Object],
-      default: undefined
+      default: null
     }
   },
   methods: {
@@ -65,7 +65,7 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 @import '../../styles/var';
 
 .nova-ui-dropdown {
