@@ -1,11 +1,11 @@
 <template>
-  <div class="nova-ui-select-option-group" v-bind="$attrs" v-on="$listeners">
-    <div class="nova-ui-select-option-group-label">
+  <div class="nova-select-option-group" v-bind="$attrs" v-on="$listeners">
+    <div class="nova-select-option-group-label">
       <slot name="label">
         {{ label }}
       </slot>
     </div>
-    <div class="nova-ui-select-option-group-content">
+    <div class="nova-select-option-group-content">
       <slot></slot>
     </div>
   </div>
@@ -23,16 +23,20 @@ export default {
 </script>
 
 <style lang="less">
-.nova-ui-select-option-group {
+@import '../../styles/var';
+
+@select: @{prefixed}-select;
+
+.@{select}-option-group {
 }
 
-.nova-ui-select-option-group-label {
+.@{select}-option-group-label {
   opacity: 0.5;
   padding: 5px 10px;
 }
 
-.nova-ui-select-option-group-content {
-  .nova-ui-select-option {
+.@{select}-option-group-content {
+  .@{select}-option {
     padding-left: 20px;
   }
 }

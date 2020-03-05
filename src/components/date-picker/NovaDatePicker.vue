@@ -1,16 +1,16 @@
 <template>
   <div
-    class="nova-ui-date-picker"
+    class="nova-date-picker"
     :class="datePickerClass"
     v-bind="$attrs"
     v-on="$listeners"
     ref="date-picker"
   >
-    <div class="nova-ui-date-picker-toggle" v-if="!isRange">
-      <div class="nova-ui-date-picker-inner" ref="inner">
+    <div class="nova-date-picker-toggle" v-if="!isRange">
+      <div class="nova-date-picker-inner" ref="inner">
         <input
           autocomplete="off"
-          class="nova-ui-date-picker-input"
+          class="nova-date-picker-input"
           type="text"
           :value="displayedDate"
           readonly
@@ -21,33 +21,33 @@
           ref="input"
         />
         <span
-          class="nova-ui-date-picker-overlay nova-ui-date-picker-prefix"
+          class="nova-date-picker-overlay nova-date-picker-prefix"
           v-if="showPrefix"
         >
           <slot name="prefix"></slot>
         </span>
         <span
-          class="nova-ui-date-picker-overlay nova-ui-date-picker-suffix"
+          class="nova-date-picker-overlay nova-date-picker-suffix"
           v-if="showSuffix"
         >
           <slot name="suffix">
             {{ getSuffixText(value) }}
           </slot>
         </span>
-        <span class="nova-ui-date-picker-icon" v-if="showIcon"></span>
+        <span class="nova-date-picker-icon" v-if="showIcon"></span>
       </div>
     </div>
-    <div class="nova-ui-date-picker-toggle" v-if="isRange">
+    <div class="nova-date-picker-toggle" v-if="isRange">
       <div
-        class="nova-ui-date-picker-inner nova-ui-date-range-start"
+        class="nova-date-picker-inner nova-date-range-start"
         :class="{
-          'nova-ui-date-picker-inner-fake-disabled': startFakeDisabled
+          'nova-date-picker-inner-fake-disabled': startFakeDisabled
         }"
         ref="start"
       >
         <input
           autocomplete="off"
-          class="nova-ui-date-picker-input"
+          class="nova-date-picker-input"
           type="text"
           :value="displayedRange.start"
           readonly
@@ -61,7 +61,7 @@
         />
         <input
           autocomplete="off"
-          class="nova-ui-date-picker-input"
+          class="nova-date-picker-input"
           readonly
           @focus="handleStartFocus"
           @blur="handleStartBlur"
@@ -70,29 +70,29 @@
           :placeholder="getStartPlaceholder"
         />
         <span
-          class="nova-ui-date-picker-overlay nova-ui-date-picker-prefix"
+          class="nova-date-picker-overlay nova-date-picker-prefix"
           v-if="showPrefix"
         >
           <slot range="start" name="prefix"></slot>
         </span>
         <span
-          class="nova-ui-date-picker-overlay nova-ui-date-picker-suffix"
+          class="nova-date-picker-overlay nova-date-picker-suffix"
           v-if="showSuffix"
         >
           <slot range="start" name="suffix">
             {{ getSuffixText(value[0]) }}
           </slot>
         </span>
-        <span class="nova-ui-date-picker-icon" v-if="showIcon"></span>
+        <span class="nova-date-picker-icon" v-if="showIcon"></span>
       </div>
       <div
-        class="nova-ui-date-picker-inner nova-ui-date-range-end"
-        :class="{ 'nova-ui-date-picker-inner-fake-disabled': endFakeDisabled }"
+        class="nova-date-picker-inner nova-date-range-end"
+        :class="{ 'nova-date-picker-inner-fake-disabled': endFakeDisabled }"
         ref="end"
       >
         <input
           autocomplete="off"
-          class="nova-ui-date-picker-input"
+          class="nova-date-picker-input"
           type="text"
           :value="displayedRange.end"
           readonly
@@ -106,7 +106,7 @@
         />
         <input
           autocomplete="off"
-          class="nova-ui-date-picker-input nova-ui-date-picker-input-fake-disabled"
+          class="nova-date-picker-input nova-date-picker-input-fake-disabled"
           readonly
           @focus="handleEndFocus"
           @blur="handleEndBlur"
@@ -115,30 +115,30 @@
           :placeholder="getEndPlaceholder"
         />
         <span
-          class="nova-ui-date-picker-overlay nova-ui-date-picker-prefix"
+          class="nova-date-picker-overlay nova-date-picker-prefix"
           v-if="showPrefix"
         >
           <slot range="end" name="prefix"></slot>
         </span>
         <span
-          class="nova-ui-date-picker-overlay nova-ui-date-picker-suffix"
+          class="nova-date-picker-overlay nova-date-picker-suffix"
           v-if="showSuffix"
         >
           <slot range="end" name="suffix">
             {{ getSuffixText(value[1]) }}
           </slot>
         </span>
-        <span class="nova-ui-date-picker-icon" v-if="showIcon"></span>
+        <span class="nova-date-picker-icon" v-if="showIcon"></span>
       </div>
     </div>
     <NovaDropdown
       ref="dropdown"
       :opened="opened"
       :append-to-body="appendToBody"
-      :popover-class="['nova-ui-date-picker-dropdown', popoverClass]"
+      :popover-class="['nova-date-picker-dropdown', popoverClass]"
     >
       <div
-        class="nova-ui-date-picker-months"
+        class="nova-date-picker-months"
         ref="months"
         @mousedown="handleDropdownMousedown"
       >
@@ -152,7 +152,7 @@
         ></Month>
       </div>
       <div
-        class="nova-ui-date-picker-tooltip"
+        class="nova-date-picker-tooltip"
         v-show="tooltip.visible && showTooltip"
         :style="tooltipStyle()"
       >
@@ -163,12 +163,12 @@
 </template>
 
 <script>
-import Month from './Month';
-import moment from 'moment';
-import NovaDropdown from '../dropdown/NovaDropdown';
-import locale from '@/mixin/locale';
+import dayjs from 'dayjs';
 import Utils from '@/utils/utils';
 import Calendar from '@/utils/calendar';
+import locale from '@/mixin/locale';
+import NovaDropdown from '@/components/dropdown/NovaDropdown';
+import Month from './Month';
 
 export default {
   name: 'NovaDatePicker',
@@ -268,7 +268,7 @@ export default {
     }
   },
   data() {
-    let first = Calendar.getFirstDateMomentOfMonth(moment());
+    let first = Calendar.getFirstDateMomentOfMonth(dayjs());
     return {
       blurTimer: null,
       startBlurTimer: null,
@@ -356,13 +356,12 @@ export default {
     init() {
       this.refreshDateList();
     },
+    isToday(dateMoment) {
+      let now = dayjs();
+      return dateMoment.isSame(now, 'date');
+    },
     getSpecialText(dateMoment) {
       let ymd = dateMoment.format(Calendar.defaultFormat);
-
-      let now = moment();
-      if (dateMoment.isSame(now, 'date')) {
-        return this.novaLocale.datePicker.today;
-      }
 
       let holiday = this.novaHoliday;
       if (holiday) {
@@ -379,11 +378,11 @@ export default {
       if (!date) {
         return;
       }
-      let day = moment(date).day();
+      let day = dayjs(date).day();
       return novaLocale.datePicker.weeksLong[this.weeks[day]];
     },
     getSuffixText(date) {
-      let dateMoment = moment(date);
+      let dateMoment = dayjs(date);
       let specialText = this.getSpecialText(dateMoment);
       if (specialText) {
         return specialText;
@@ -526,13 +525,13 @@ export default {
       if (!date) {
         return '';
       }
-      return moment(date).format(this.format);
+      return dayjs(date).format(this.format);
     },
     dateToMoment(date) {
-      if (!moment.isDate(date)) {
+      if (!dayjs(date).isValid()) {
         return null;
       }
-      return moment(date);
+      return dayjs(date);
     },
     refreshDateList() {
       this.defaultEndTooltip = null;
@@ -564,7 +563,7 @@ export default {
       let newStartDate = dateRange[0];
 
       if (rangeCurrentPane === 0 && oldEndDate) {
-        if (moment(oldEndDate).isBefore(moment(newStartDate))) {
+        if (dayjs(oldEndDate).isBefore(dayjs(newStartDate))) {
           dateRange[1] = new Date(newStartDate);
         }
       }
@@ -598,7 +597,7 @@ export default {
       if (!date) {
         return;
       }
-      if (moment.isDate(date)) {
+      if (dayjs(date).isValid()) {
         this.paneMoment = Calendar.getFirstDateMomentOfMonth(date);
       }
 
@@ -685,7 +684,9 @@ export default {
 <style lang="less">
 @import '../../styles/var';
 
-.nova-ui-date-picker {
+@date-picket: @{prefixed}-date-picker;
+
+.@{date-picket} {
   vertical-align: top;
   display: inline-block;
   font-size: 14px;
@@ -697,13 +698,13 @@ export default {
   }
 }
 
-.nova-ui-date-picker-toggle {
+.@{date-picket}-toggle {
   box-sizing: border-box;
   width: 200px;
   height: 30px;
 }
 
-.nova-ui-date-picker-inner {
+.@{date-picket}-inner {
   display: block;
   box-sizing: border-box;
   height: 100%;
@@ -712,19 +713,19 @@ export default {
     color: @placeholder-color;
   }
 
-  &.nova-ui-date-picker-inner-fake-disabled {
-    .nova-ui-date-picker-input {
+  &.@{date-picket}-inner-fake-disabled {
+    .@{date-picket}-input {
       background-color: #eeeeee;
       color: @placeholder-color;
     }
 
-    .nova-ui-date-picker-suffix {
+    .@{date-picket}-suffix {
       display: none;
     }
   }
 }
 
-.nova-ui-date-picker-input {
+.@{date-picket}-input {
   line-height: 18px;
   box-sizing: border-box;
   border: 1px solid #ccc;
@@ -739,7 +740,7 @@ export default {
   }
 }
 
-.nova-ui-date-picker-overlay {
+.@{date-picket}-overlay {
   color: #999;
   margin-right: 30px;
   display: block;
@@ -748,22 +749,22 @@ export default {
   pointer-events: none;
 }
 
-.nova-ui-date-picker-prefix,
-.nova-ui-date-picker-suffix {
+.@{date-picket}-prefix,
+.@{date-picket}-suffix {
   padding: 5px;
   vertical-align: top;
   display: inline-block;
 }
 
-.nova-ui-date-picker-prefix {
+.@{date-picket}-prefix {
   float: left;
 }
 
-.nova-ui-date-picker-suffix {
+.@{date-picket}-suffix {
   float: right;
 }
 
-.nova-ui-date-picker-icon {
+.@{date-picket}-icon {
   float: right;
   margin-top: -30px;
   position: relative;
@@ -783,11 +784,11 @@ export default {
   }
 }
 
-.nova-ui-date-picker-months {
+.@{date-picket}-months {
   white-space: nowrap;
 }
 
-.nova-ui-date-picker-tooltip {
+.@{date-picket}-tooltip {
   position: absolute;
   color: #666666;
   border: 1px solid #cccccc;

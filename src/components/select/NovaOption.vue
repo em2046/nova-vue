@@ -1,6 +1,6 @@
 <template>
   <div
-    class="nova-ui-select-option"
+    class="nova-select-option"
     :class="optionClasses"
     @click="handleClick"
     v-bind="$attrs"
@@ -51,8 +51,11 @@ export default {
       }
 
       this.$emit('click', ...args);
-      this.NovaSelect.setValue(this.value);
-      this.NovaSelect.close();
+      this.NovaSelect.setSelected(this.value);
+
+      if (!this.NovaSelect.multiple) {
+        this.NovaSelect.close();
+      }
     },
     isSelected() {
       let NovaSelect = this.NovaSelect;
@@ -78,7 +81,11 @@ export default {
 </script>
 
 <style lang="less">
-.nova-ui-select-option {
+@import '../../styles/var';
+
+@select: @{prefixed}-select;
+
+.@{select}-option {
   cursor: pointer;
   padding: 5px 10px;
 

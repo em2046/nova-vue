@@ -1,17 +1,17 @@
 <template>
   <div
     ref="checkbox"
-    class="nova-ui-checkbox"
+    class="nova-checkbox"
     v-bind="$attrs"
     v-on="$listeners"
     @click="handleCheckboxClick"
     :class="classList"
     :tabindex="!isDisabled ? 0 : -1"
   >
-    <div class="nova-ui-checkbox-input">
-      <div class="nova-ui-checkbox-inner"></div>
+    <div class="nova-checkbox-input">
+      <div class="nova-checkbox-inner"></div>
     </div>
-    <div class="nova-ui-checkbox-label">
+    <div class="nova-checkbox-label">
       <slot>{{ label }}</slot>
     </div>
   </div>
@@ -27,7 +27,7 @@ export default {
   },
   model: {
     prop: 'checked',
-    event: 'change'
+    event: 'update'
   },
   props: {
     checked: {
@@ -62,7 +62,7 @@ export default {
     },
     isChecked() {
       if (this.NovaCheckboxGroup) {
-        return this.groupValue.find(item => {
+        return this.groupValue.some(item => {
           return item === this.value;
         });
       } else {
@@ -71,22 +71,41 @@ export default {
     }
   },
   methods: {
-    onlySingleClick() {
-      this.$emit('change', !this.checked);
-    },
     inGroupClick() {
-      this.NovaCheckboxGroup.setCheck(this.value, !this.isChecked);
+      this.NovaCheckboxGroup.setChecked(this.value, !this.isChecked, true);
     },
     handleCheckboxClick() {
       if (this.isDisabled) {
         return;
       }
 
+      this.$emit('change', !this.isChecked);
+
       if (this.NovaCheckboxGroup) {
         this.inGroupClick();
       } else {
-        this.onlySingleClick();
+        this.$emit('update', !this.isChecked);
       }
+    }
+  },
+  watch: {
+    isChecked(newValue, oldValue) {
+      if (newValue === oldValue) {
+        return;
+      }
+
+      this.$emit('update', newValue);
+    },
+    checked(newValue, oldValue) {
+      if (newValue === oldValue) {
+        return;
+      }
+
+      if (!this.NovaCheckboxGroup) {
+        return;
+      }
+
+      this.NovaCheckboxGroup.setChecked(this.value, newValue, false);
     }
   }
 };
@@ -95,7 +114,13 @@ export default {
 <style lang="less">
 @import '../../styles/var';
 
-.nova-ui-checkbox {
+@checkbox: @{prefixed}-checkbox;
+
+@checkWidth: 4.94974747px; // sqrt(7^2 / 2)
+@checkHeight: 8.4852814px; // sqrt(12^2 / 2)
+@checkTop: 1.41421356px; // sqrt(2^2 / 2)
+
+.@{checkbox} {
   cursor: pointer;
   line-height: 20px;
   color: #333333;
@@ -108,7 +133,7 @@ export default {
     outline: none;
 
     &:not(.is-disabled) {
-      .nova-ui-checkbox-input {
+      .@{checkbox}-input {
         border: 1px solid #ee3388;
       }
     }
@@ -120,23 +145,26 @@ export default {
   }
 
   &:hover:not(.is-disabled) {
-    .nova-ui-checkbox-input {
+    .@{checkbox}-input {
       border: 1px solid #ee3388;
     }
   }
 
   &.is-checked {
-    .nova-ui-checkbox-input {
+    .@{checkbox}-input {
       border: 1px solid #ee3388;
     }
 
-    .nova-ui-checkbox-inner {
-      display: block;
+    .@{checkbox}-inner {
+      &:before {
+        transform: rotate(45deg) scale(1);
+        opacity: 1;
+      }
     }
   }
 }
 
-.nova-ui-checkbox-input {
+.@{checkbox}-input {
   display: inline-block;
   vertical-align: top;
   width: 14px;
@@ -148,31 +176,25 @@ export default {
   position: relative;
 }
 
-.nova-ui-checkbox-inner {
-  display: none;
-  width: 4.94974747px;
-  height: 8.4852814px;
-  transform: translate(-50%, -50%);
-  transform-origin: center center;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-
+.@{checkbox}-inner {
   &:before {
-    margin-top: -0.70710678px; //( sqrt(2^2 / 2) ) / 2
+    opacity: 0;
+    margin-top: (12 - @checkHeight) / 2 - @checkTop / 2;
+    margin-left: (12 - @checkWidth) / 2;
     box-sizing: border-box;
-    width: 4.94974747px; //sqrt(7^2 / 2)
-    height: 8.4852814px; //sqrt(12^2 / 2)
+    width: @checkWidth;
+    height: @checkHeight;
     content: '';
     display: block;
     border: 2px solid #ee3388;
     border-top: none;
     border-left: none;
-    transform: rotate(45deg);
+    transform: rotate(45deg) scale(0);
+    transition: transform @normal-motion @ease-out-backward;
   }
 }
 
-.nova-ui-checkbox-label {
+.@{checkbox}-label {
   display: inline-block;
   vertical-align: top;
 }

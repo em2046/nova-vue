@@ -1,18 +1,12 @@
 import Vue from 'vue';
 import App from './App.vue';
 import router from './router';
-
-//region vue-client-only
-import ClientOnly from 'vue-client-only';
-
-Vue.component('ClientOnly', ClientOnly);
-//endregion
-
-//region portal-vue
 import PortalVue from 'portal-vue';
+import ClientOnly from 'vue-client-only';
+import './styles/common.less';
 
 Vue.use(PortalVue);
-//endregion
+Vue.component('ClientOnly', ClientOnly);
 
 Vue.config.productionTip = false;
 

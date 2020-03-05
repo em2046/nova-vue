@@ -1,17 +1,17 @@
 <template>
   <div
-    class="nova-ui-autocomplete"
+    class="nova-autocomplete"
     :class="autocompleteClass"
     v-bind="$attrs"
     v-on="$listeners"
     ref="autocomplete"
   >
-    <div class="nova-ui-autocomplete-toggle">
-      <div class="nova-ui-autocomplete-inner">
+    <div class="nova-autocomplete-toggle">
+      <div class="nova-autocomplete-inner">
         <input
           autocomplete="off"
           ref="input"
-          class="nova-ui-autocomplete-input"
+          class="nova-autocomplete-input"
           type="text"
           :value.prop="valueModel"
           :placeholder="placeholder"
@@ -22,13 +22,13 @@
           @keydown="handleKeydown"
         />
         <span
-          class="nova-ui-autocomplete-overlay nova-ui-autocomplete-prefix"
+          class="nova-autocomplete-overlay nova-autocomplete-prefix"
           v-if="showPrefix"
         >
           <slot name="prefix"></slot>
         </span>
         <span
-          class="nova-ui-autocomplete-overlay nova-ui-autocomplete-suffix"
+          class="nova-autocomplete-overlay nova-autocomplete-suffix"
           v-if="showSuffix"
         >
           <slot name="suffix"></slot>
@@ -39,9 +39,9 @@
       ref="start-dropdown"
       :opened="start.opened"
       :append-to-body="appendToBody"
-      :popover-class="['nova-ui-autocomplete-dropdown', popoverClass]"
+      :popover-class="['nova-autocomplete-dropdown', popoverClass]"
     >
-      <div class="nova-ui-autocomplete-start">
+      <div class="nova-autocomplete-start">
         <slot name="start"></slot>
       </div>
     </NovaDropdown>
@@ -49,24 +49,24 @@
       ref="list-dropdown"
       :opened="list.opened"
       :append-to-body="appendToBody"
-      :popover-class="['nova-ui-autocomplete-dropdown', popoverClass]"
+      :popover-class="['nova-autocomplete-dropdown', popoverClass]"
     >
       <div
-        class="nova-ui-autocomplete-groups"
+        class="nova-autocomplete-groups"
         ref="groups"
         v-if="list.groups.length"
       >
         <div
-          class="nova-ui-autocomplete-group"
+          class="nova-autocomplete-group"
           v-for="(group, groupIndex) in list.groups"
           :key="groupIndex"
         >
-          <div class="nova-ui-autocomplete-label">
+          <div class="nova-autocomplete-label">
             <slot name="group-label" :group="group"></slot>
           </div>
-          <div class="nova-ui-autocomplete-list" v-if="group.children.length">
+          <div class="nova-autocomplete-list" v-if="group.children.length">
             <div
-              class="nova-ui-autocomplete-item"
+              class="nova-autocomplete-item"
               :class="{
                 'is-selected': item.index === list.activeIndex,
                 'is-disabled': item.disabled
@@ -86,7 +86,7 @@
 
       <template v-if="!list.data.length">
         <slot name="empty">
-          <div class="nova-ui-autocomplete-empty">
+          <div class="nova-autocomplete-empty">
             <NovaAlert type="info">
               <span>{{ novaLocale.autocomplete.noData }}</span>
             </NovaAlert>
@@ -98,11 +98,11 @@
 </template>
 
 <script>
-import NovaDropdown from '@/components/dropdown/NovaDropdown';
+import debounce from 'lodash/debounce';
 import Utils from '@/utils/utils';
-import lodash from 'lodash';
-import NovaAlert from '@/components/alert/NovaAlert';
 import locale from '@/mixin/locale';
+import NovaDropdown from '@/components/dropdown/NovaDropdown';
+import NovaAlert from '@/components/alert/NovaAlert';
 
 const POSITION = {
   BOTTOM: 'BOTTOM',
@@ -196,7 +196,7 @@ export default {
     }
   },
   data() {
-    let searchDebounce = lodash.debounce(this.searchImplement, this.debounce);
+    let searchDebounce = debounce(this.searchImplement, this.debounce);
     return {
       searchDebounce: searchDebounce,
       queryString: '',
@@ -544,7 +544,9 @@ export default {
 <style lang="less">
 @import '../../styles/var';
 
-.nova-ui-autocomplete {
+@autocomplete: @{prefixed}-autocomplete;
+
+.@{autocomplete} {
   vertical-align: top;
   display: inline-block;
   font-size: 14px;
@@ -556,19 +558,19 @@ export default {
   }
 }
 
-.nova-ui-autocomplete-toggle {
+.@{autocomplete}-toggle {
   box-sizing: border-box;
   width: 200px;
   height: 30px;
 }
 
-.nova-ui-autocomplete-inner {
+.@{autocomplete}-inner {
   ::placeholder {
     color: @placeholder-color;
   }
 }
 
-.nova-ui-autocomplete-input {
+.@{autocomplete}-input {
   line-height: 18px;
   height: 30px;
   box-sizing: border-box;
@@ -582,7 +584,7 @@ export default {
   }
 }
 
-.nova-ui-autocomplete-overlay {
+.@{autocomplete}-overlay {
   color: #999;
   display: block;
   margin-top: -30px;
@@ -590,22 +592,22 @@ export default {
   pointer-events: none;
 }
 
-.nova-ui-autocomplete-prefix,
-.nova-ui-autocomplete-suffix {
+.@{autocomplete}-prefix,
+.@{autocomplete}-suffix {
   padding: 5px;
   vertical-align: top;
   display: inline-block;
 }
 
-.nova-ui-autocomplete-prefix {
+.@{autocomplete}-prefix {
   float: left;
 }
 
-.nova-ui-autocomplete-suffix {
+.@{autocomplete}-suffix {
   float: right;
 }
 
-.nova-ui-autocomplete-item {
+.@{autocomplete}-item {
   cursor: pointer;
   padding: 5px 10px;
 
@@ -624,18 +626,18 @@ export default {
   }
 }
 
-.nova-ui-autocomplete-empty {
-  .nova-ui-alert {
+.@{autocomplete}-empty {
+  .nova-alert {
     padding-left: 30px;
     padding-right: 10px;
   }
 }
 
-.nova-ui-autocomplete-start {
+.@{autocomplete}-start {
   width: 198px;
 }
 
-.nova-ui-autocomplete-groups {
+.@{autocomplete}-groups {
   width: 198px;
   max-height: 300px;
   overflow: auto;

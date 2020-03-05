@@ -1,51 +1,57 @@
 <template>
-  <div
-    v-show="visible"
-    class="nova-ui-alert"
-    :class="classNameList"
-    v-bind="$attrs"
-    v-on="$listeners"
-  >
-    <NovaAlertIcon :type="type"></NovaAlertIcon>
+  <transition name="nova-alert-slide-up" @after-leave="handleAfterLeave">
     <div
-      class="nova-ui-alert-close"
-      @click="handleCloseClick"
-      v-if="border && closable"
+      v-show="visible"
+      class="nova-alert"
+      :class="classNameList"
+      v-bind="$attrs"
+      v-on="$listeners"
+      ref="alert"
     >
-      <div class="nova-ui-alert-close-icon"></div>
+      <Icon :type="type"></Icon>
+      <div
+        class="nova-alert-close"
+        @click="handleCloseClick"
+        v-if="border && closable"
+      >
+        <div class="nova-alert-close-icon"></div>
+      </div>
+      <slot></slot>
+      <div class="nova-alert-arrow"></div>
     </div>
-    <slot></slot>
-    <div class="nova-ui-alert-arrow"></div>
-  </div>
+  </transition>
 </template>
 
 <script>
-import NovaAlertIcon from '@/components/alert/NovaAlertIcon';
+import Icon from './Icon';
 
 export default {
   name: 'NovaAlert',
-  components: { NovaAlertIcon },
+  components: { Icon },
   data() {
     return {
-      visible: true
+      visible: true,
+      closing: false
     };
   },
   computed: {
     classNameList() {
       let border = this.border;
-      let type = this.type;
+      let type = this.type || 'normal';
       let block = this.block;
       let closable = this.closable;
       let visibleArrow = this.visibleArrow;
       let placement = this.placement;
+      let closing = this.closing;
       return [
-        `nova-ui-alert-${type}`,
-        `nova-ui-alert-placement-${placement}`,
+        `nova-alert-${type}`,
+        `nova-alert-placement-${placement}`,
         {
-          'nova-ui-alert-border': border,
-          'nova-ui-alert-block': block,
-          'nova-ui-alert-closable': border && closable,
-          'nova-ui-alert-has-arrow': border && visibleArrow
+          'nova-alert-border': border,
+          'nova-alert-block': block,
+          'nova-alert-closing': closing,
+          'nova-alert-closable': border && closable,
+          'nova-alert-has-arrow': border && visibleArrow
         }
       ];
     }
@@ -102,9 +108,24 @@ export default {
     close() {
       this.visible = false;
       this.$emit('close');
+
+      let $alert = this.$refs['alert'];
+
+      $alert.style.height = `${$alert.offsetHeight}px`;
+      // Magic code
+      // We can only set twice that the height can right
+      $alert.style.height = `${$alert.offsetHeight}px`;
+
+      this.closing = true;
     },
     handleCloseClick() {
       this.close();
+    },
+    handleAfterLeave() {
+      this.closing = false;
+      let $alert = this.$refs['alert'];
+      $alert.style.height = null;
+      this.$emit('afterClose');
     }
   }
 };
@@ -113,56 +134,63 @@ export default {
 <style lang="less">
 @import '../../styles/var';
 
+@alert: @{prefixed}-alert;
+
 @default-border-color: #dddddd;
 @default-background-color: #f6f6f6;
 
 @success-border-color: #66cc33;
+@success-close-color: #ade392;
 @success-background-color: #f8fff2;
 
 @error-border-color: #ff8888;
+@error-close-color: #feac97;
 @error-background-color: #fff2f2;
 
 @warning-border-color: #ffaa00;
+@warning-close-color: #ffda8f;
 @warning-background-color: #fffaee;
 
 @info-border-color: #88bbee;
+@info-close-color: #96cff5;
 @info-background-color: #f0f5fc;
 
-.nova-ui-alert {
+.@{alert} {
   padding: 6px 0 6px 0;
   font-family: @font-family;
   vertical-align: top;
   display: inline-block;
+  box-sizing: border-box;
   font-size: 12px;
   color: #333333;
   line-height: 18px;
 
-  &.nova-ui-alert-success,
-  &.nova-ui-alert-error,
-  &.nova-ui-alert-warning,
-  &.nova-ui-alert-info,
-  &.nova-ui-alert-help {
+  &.@{alert}-success,
+  &.@{alert}-error,
+  &.@{alert}-warning,
+  &.@{alert}-info,
+  &.@{alert}-help {
     padding: 6px 0 6px 20px;
 
-    .nova-ui-alert-icon {
+    .@{alert}-icon {
       margin: 2px 5px 0 -19px;
     }
   }
 
-  &.nova-ui-alert-weak {
+  &.@{alert}-weak {
     color: #999;
   }
 }
 
-.nova-ui-alert-has-arrow {
+.@{alert}-has-arrow {
   position: relative;
 
-  .nova-ui-alert-arrow {
+  .@{alert}-arrow {
     display: block;
   }
 }
 
-.nova-ui-alert-arrow {
+.@{alert}-arrow {
   display: none;
 
   &:before,
@@ -176,10 +204,10 @@ export default {
   }
 }
 
-.nova-ui-alert-placement-top-start,
-.nova-ui-alert-placement-top,
-.nova-ui-alert-placement-top-end {
-  .nova-ui-alert-arrow {
+.@{alert}-placement-top-start,
+.@{alert}-placement-top,
+.@{alert}-placement-top-end {
+  .@{alert}-arrow {
     position: absolute;
     transform: translate(-50%, 0);
 
@@ -203,67 +231,35 @@ export default {
     }
   }
 
-  &.nova-ui-alert-success {
-    .nova-ui-alert-arrow {
-      &:before {
-        border-color: transparent transparent @success-border-color transparent;
-      }
+  .arrow(@type; @border-color; @background-color) {
+    &.@{alert}-@{type} {
+      .@{alert}-arrow {
+        &:before {
+          border-color: transparent transparent @border-color transparent;
+        }
 
-      &:after {
-        border-color: transparent transparent @success-background-color
-          transparent;
-      }
-    }
-  }
-
-  &.nova-ui-alert-error {
-    .nova-ui-alert-arrow {
-      &:before {
-        border-color: transparent transparent @error-border-color transparent;
-      }
-
-      &:after {
-        border-color: transparent transparent @error-background-color
-          transparent;
+        &:after {
+          border-color: transparent transparent @background-color transparent;
+        }
       }
     }
   }
 
-  &.nova-ui-alert-warning {
-    .nova-ui-alert-arrow {
-      &:before {
-        border-color: transparent transparent @warning-border-color transparent;
-      }
+  .arrow(success; @success-border-color; @success-background-color);
+  .arrow(error; @error-border-color; @error-background-color);
+  .arrow(warning; @warning-border-color; @warning-background-color);
+  .arrow(info; @info-border-color; @info-background-color);
+  .arrow(help; @info-border-color; @info-background-color);
 
-      &:after {
-        border-color: transparent transparent @warning-background-color
-          transparent;
-      }
-    }
-  }
-
-  &.nova-ui-alert-info,
-  &.nova-ui-alert-help {
-    .nova-ui-alert-arrow {
-      &:before {
-        border-color: transparent transparent @info-border-color transparent;
-      }
-
-      &:after {
-        border-color: transparent transparent @info-background-color transparent;
-      }
-    }
-  }
-
-  .nova-ui-alert-arrow {
+  .@{alert}-arrow {
     top: 0;
   }
 }
 
-.nova-ui-alert-placement-bottom-start,
-.nova-ui-alert-placement-bottom,
-.nova-ui-alert-placement-bottom-end {
-  .nova-ui-alert-arrow {
+.@{alert}-placement-bottom-start,
+.@{alert}-placement-bottom,
+.@{alert}-placement-bottom-end {
+  .@{alert}-arrow {
     position: absolute;
     transform: translate(-50%, 0);
 
@@ -287,67 +283,35 @@ export default {
     }
   }
 
-  &.nova-ui-alert-success {
-    .nova-ui-alert-arrow {
-      &:before {
-        border-color: @success-border-color transparent transparent transparent;
-      }
+  .arrow(@type; @border-color; @background-color) {
+    &.@{alert}-@{type} {
+      .@{alert}-arrow {
+        &:before {
+          border-color: @border-color transparent transparent transparent;
+        }
 
-      &:after {
-        border-color: @success-background-color transparent transparent
-          transparent;
-      }
-    }
-  }
-
-  &.nova-ui-alert-error {
-    .nova-ui-alert-arrow {
-      &:before {
-        border-color: @error-border-color transparent transparent transparent;
-      }
-
-      &:after {
-        border-color: @error-background-color transparent transparent
-          transparent;
+        &:after {
+          border-color: @background-color transparent transparent transparent;
+        }
       }
     }
   }
 
-  &.nova-ui-alert-warning {
-    .nova-ui-alert-arrow {
-      &:before {
-        border-color: @warning-border-color transparent transparent transparent;
-      }
+  .arrow(success; @success-border-color; @success-background-color);
+  .arrow(error; @error-border-color; @error-background-color);
+  .arrow(warning; @warning-border-color; @warning-background-color);
+  .arrow(info; @info-border-color; @info-background-color);
+  .arrow(help; @info-border-color; @info-background-color);
 
-      &:after {
-        border-color: @warning-background-color transparent transparent
-          transparent;
-      }
-    }
-  }
-
-  &.nova-ui-alert-info,
-  &.nova-ui-alert-help {
-    .nova-ui-alert-arrow {
-      &:before {
-        border-color: @info-border-color transparent transparent transparent;
-      }
-
-      &:after {
-        border-color: @info-background-color transparent transparent transparent;
-      }
-    }
-  }
-
-  .nova-ui-alert-arrow {
+  .@{alert}-arrow {
     bottom: 0;
   }
 }
 
-.nova-ui-alert-placement-left-start,
-.nova-ui-alert-placement-left,
-.nova-ui-alert-placement-left-end {
-  .nova-ui-alert-arrow {
+.@{alert}-placement-left-start,
+.@{alert}-placement-left,
+.@{alert}-placement-left-end {
+  .@{alert}-arrow {
     position: absolute;
     transform: translate(0, -50%);
 
@@ -371,67 +335,35 @@ export default {
     }
   }
 
-  &.nova-ui-alert-success {
-    .nova-ui-alert-arrow {
-      &:before {
-        border-color: transparent @success-border-color transparent transparent;
-      }
+  .arrow(@type; @border-color; @background-color) {
+    &.@{alert}-@{type} {
+      .@{alert}-arrow {
+        &:before {
+          border-color: transparent @border-color transparent transparent;
+        }
 
-      &:after {
-        border-color: transparent @success-background-color transparent
-          transparent;
-      }
-    }
-  }
-
-  &.nova-ui-alert-error {
-    .nova-ui-alert-arrow {
-      &:before {
-        border-color: transparent @error-border-color transparent transparent;
-      }
-
-      &:after {
-        border-color: transparent @error-background-color transparent
-          transparent;
+        &:after {
+          border-color: transparent @background-color transparent transparent;
+        }
       }
     }
   }
 
-  &.nova-ui-alert-warning {
-    .nova-ui-alert-arrow {
-      &:before {
-        border-color: transparent @warning-border-color transparent transparent;
-      }
+  .arrow(success; @success-border-color; @success-background-color);
+  .arrow(error; @error-border-color; @error-background-color);
+  .arrow(warning; @warning-border-color; @warning-background-color);
+  .arrow(info; @info-border-color; @info-background-color);
+  .arrow(help; @info-border-color; @info-background-color);
 
-      &:after {
-        border-color: transparent @warning-background-color transparent
-          transparent;
-      }
-    }
-  }
-
-  &.nova-ui-alert-info,
-  &.nova-ui-alert-help {
-    .nova-ui-alert-arrow {
-      &:before {
-        border-color: transparent @info-border-color transparent transparent;
-      }
-
-      &:after {
-        border-color: transparent @info-background-color transparent transparent;
-      }
-    }
-  }
-
-  .nova-ui-alert-arrow {
+  .@{alert}-arrow {
     left: 0;
   }
 }
 
-.nova-ui-alert-placement-right-start,
-.nova-ui-alert-placement-right,
-.nova-ui-alert-placement-right-end {
-  .nova-ui-alert-arrow {
+.@{alert}-placement-right-start,
+.@{alert}-placement-right,
+.@{alert}-placement-right-end {
+  .@{alert}-arrow {
     position: absolute;
     transform: translate(0, -50%);
 
@@ -455,213 +387,146 @@ export default {
     }
   }
 
-  &.nova-ui-alert-success {
-    .nova-ui-alert-arrow {
-      &:before {
-        border-color: transparent transparent transparent @success-border-color;
-      }
+  .arrow(@type; @border-color; @background-color) {
+    &.@{alert}-@{type} {
+      .@{alert}-arrow {
+        &:before {
+          border-color: transparent transparent transparent @border-color;
+        }
 
-      &:after {
-        border-color: transparent transparent transparent
-          @success-background-color;
-      }
-    }
-  }
-
-  &.nova-ui-alert-error {
-    .nova-ui-alert-arrow {
-      &:before {
-        border-color: transparent transparent transparent @error-border-color;
-      }
-
-      &:after {
-        border-color: transparent transparent transparent
-          @error-background-color;
+        &:after {
+          border-color: transparent transparent transparent @background-color;
+        }
       }
     }
   }
 
-  &.nova-ui-alert-warning {
-    .nova-ui-alert-arrow {
-      &:before {
-        border-color: transparent transparent transparent @warning-border-color;
-      }
+  .arrow(success; @success-border-color; @success-background-color);
+  .arrow(error; @error-border-color; @error-background-color);
+  .arrow(warning; @warning-border-color; @warning-background-color);
+  .arrow(info; @info-border-color; @info-background-color);
+  .arrow(help; @info-border-color; @info-background-color);
 
-      &:after {
-        border-color: transparent transparent transparent
-          @warning-background-color;
-      }
-    }
-  }
-
-  &.nova-ui-alert-info,
-  &.nova-ui-alert-help {
-    .nova-ui-alert-arrow {
-      &:before {
-        border-color: transparent transparent transparent @info-border-color;
-      }
-
-      &:after {
-        border-color: transparent transparent transparent @info-background-color;
-      }
-    }
-  }
-
-  .nova-ui-alert-arrow {
+  .@{alert}-arrow {
     left: 100%;
   }
 }
 
-.nova-ui-alert-placement-top-start,
-.nova-ui-alert-placement-bottom-start {
-  .nova-ui-alert-arrow {
+.@{alert}-placement-top-start,
+.@{alert}-placement-bottom-start {
+  .@{alert}-arrow {
     margin-left: 14px;
     left: 0;
   }
 }
 
-.nova-ui-alert-placement-top,
-.nova-ui-alert-placement-bottom {
-  .nova-ui-alert-arrow {
+.@{alert}-placement-top,
+.@{alert}-placement-bottom {
+  .@{alert}-arrow {
     left: 50%;
   }
 }
 
-.nova-ui-alert-placement-top-end,
-.nova-ui-alert-placement-bottom-end {
-  .nova-ui-alert-arrow {
+.@{alert}-placement-top-end,
+.@{alert}-placement-bottom-end {
+  .@{alert}-arrow {
     margin-left: -14px;
     left: 100%;
   }
 }
 
-.nova-ui-alert-placement-left-start,
-.nova-ui-alert-placement-right-start {
-  .nova-ui-alert-arrow {
+.@{alert}-placement-left-start,
+.@{alert}-placement-right-start {
+  .@{alert}-arrow {
     margin-top: 14px;
     top: 0;
   }
 }
 
-.nova-ui-alert-placement-left,
-.nova-ui-alert-placement-right {
-  .nova-ui-alert-arrow {
+.@{alert}-placement-left,
+.@{alert}-placement-right {
+  .@{alert}-arrow {
     top: 50%;
   }
 }
 
-.nova-ui-alert-placement-left-end,
-.nova-ui-alert-placement-right-end {
-  .nova-ui-alert-arrow {
+.@{alert}-placement-left-end,
+.@{alert}-placement-right-end {
+  .@{alert}-arrow {
     margin-top: -14px;
     top: 100%;
   }
 }
 
-.nova-ui-alert-block {
+.@{alert}-block {
   display: block;
 }
 
-.nova-ui-alert-border {
+.@{alert}-closing {
+  height: 0 !important;
+}
+
+.@{alert}-border {
   background-color: @default-background-color;
   border: 1px solid @default-border-color;
   padding: 5px 11px 5px 11px;
 
-  &.nova-ui-alert-success,
-  &.nova-ui-alert-error,
-  &.nova-ui-alert-warning,
-  &.nova-ui-alert-info,
-  &.nova-ui-alert-help {
+  &.@{alert}-success,
+  &.@{alert}-error,
+  &.@{alert}-warning,
+  &.@{alert}-info,
+  &.@{alert}-help {
     padding: 5px 6px 5px 26px;
 
-    &.nova-ui-alert-closable {
+    &.@{alert}-closable {
       padding: 5px 28px 5px 26px;
     }
 
-    .nova-ui-alert-icon {
+    .@{alert}-icon {
       margin: 2px 5px 0 -19px;
     }
   }
 
-  &.nova-ui-alert-success {
-    background-color: @success-background-color;
-    border: 1px solid @success-border-color;
+  .border-and-close (@type; @background-color; @border-color; @close-color) {
+    &.@{alert}-@{type} {
+      background-color: @background-color;
+      border: 1px solid @border-color;
 
-    .nova-ui-alert-close-icon {
-      &:before,
-      &:after {
-        background-color: #ade392;
-      }
-
-      &:hover {
+      .@{alert}-close-icon {
         &:before,
         &:after {
-          background-color: @success-border-color;
+          background-color: @close-color;
+        }
+
+        &:hover {
+          &:before,
+          &:after {
+            background-color: @border-color;
+          }
         }
       }
     }
   }
 
-  &.nova-ui-alert-error {
-    background-color: @error-background-color;
-    border: 1px solid @error-border-color;
-
-    .nova-ui-alert-close-icon {
-      &:before,
-      &:after {
-        background-color: #feac97;
-      }
-
-      &:hover {
-        &:before,
-        &:after {
-          background-color: @error-border-color;
-        }
-      }
-    }
-  }
-
-  &.nova-ui-alert-warning {
-    background-color: @warning-background-color;
-    border: 1px solid @warning-border-color;
-
-    .nova-ui-alert-close-icon {
-      &:before,
-      &:after {
-        background-color: #ffda8f;
-      }
-
-      &:hover {
-        &:before,
-        &:after {
-          background-color: @warning-border-color;
-        }
-      }
-    }
-  }
-
-  &.nova-ui-alert-info,
-  &.nova-ui-alert-help {
-    background-color: @info-background-color;
-    border: 1px solid @info-border-color;
-
-    .nova-ui-alert-close-icon {
-      &:before,
-      &:after {
-        background-color: #96cff5;
-      }
-
-      &:hover {
-        &:before,
-        &:after {
-          background-color: @info-border-color;
-        }
-      }
-    }
-  }
+  .border-and-close
+    (
+      success; @success-background-color; @success-border-color;
+        @success-close-color
+    );
+  .border-and-close
+    (error; @error-background-color; @error-border-color; @error-close-color);
+  .border-and-close
+    (
+      warning; @warning-background-color; @warning-border-color;
+        @warning-close-color
+    );
+  .border-and-close
+    (info; @info-background-color; @info-border-color; @info-close-color);
+  .border-and-close
+    (help; @info-background-color; @info-border-color; @info-close-color);
 }
 
-.nova-ui-alert-close {
+.@{alert}-close {
   width: 14px;
   height: 14px;
   float: right;
@@ -682,7 +547,7 @@ export default {
   }
 }
 
-.nova-ui-alert-close-icon {
+.@{alert}-close-icon {
   transform: rotate(45deg);
   width: 14px;
   height: 14px;

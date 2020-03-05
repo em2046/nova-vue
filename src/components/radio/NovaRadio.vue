@@ -1,17 +1,17 @@
 <template>
   <div
     ref="radio"
-    class="nova-ui-radio"
+    class="nova-radio"
     v-bind="$attrs"
     v-on="$listeners"
     @click="handleRadioClick"
     :class="classList"
     :tabindex="!isDisabled ? 0 : -1"
   >
-    <div class="nova-ui-radio-input">
-      <div class="nova-ui-radio-inner"></div>
+    <div class="nova-radio-input">
+      <div class="nova-radio-inner"></div>
     </div>
-    <div class="nova-ui-radio-label">
+    <div class="nova-radio-label">
       <slot>{{ label }}</slot>
     </div>
   </div>
@@ -27,7 +27,7 @@ export default {
   },
   model: {
     prop: 'checked',
-    event: 'change'
+    event: 'update'
   },
   props: {
     checked: {
@@ -69,21 +69,51 @@ export default {
     }
   },
   methods: {
-    onlySingleClick: function() {
-      this.$emit('change', true);
-    },
     inGroupClick() {
-      this.NovaRadioGroup.setValue(this.value);
+      this.NovaRadioGroup.setChecked(this.value, true);
     },
     handleRadioClick() {
       if (this.isDisabled) {
         return;
       }
 
+      if (this.isChecked) {
+        return;
+      }
+
+      this.$emit('change', true);
+
       if (this.NovaRadioGroup) {
         this.inGroupClick();
       } else {
-        this.onlySingleClick();
+        this.$emit('update', true);
+      }
+    }
+  },
+  watch: {
+    isChecked(newValue, oldValue) {
+      if (newValue === oldValue) {
+        return;
+      }
+
+      this.$emit('update', newValue);
+    },
+    checked(newValue, oldValue) {
+      if (newValue === oldValue) {
+        return;
+      }
+
+      if (!this.NovaRadioGroup) {
+        return;
+      }
+
+      if (newValue) {
+        this.NovaRadioGroup.setChecked(this.value, false);
+      } else {
+        let isChecked = this.value === this.NovaRadioGroup.getChecked();
+        if (isChecked) {
+          this.NovaRadioGroup.setChecked(null, false);
+        }
       }
     }
   }
@@ -93,7 +123,9 @@ export default {
 <style lang="less">
 @import '../../styles/var';
 
-.nova-ui-radio {
+@radio: @{prefixed}-radio;
+
+.@{radio} {
   cursor: pointer;
   line-height: 20px;
   color: #333333;
@@ -106,7 +138,7 @@ export default {
     outline: none;
 
     &:not(.is-disabled) {
-      .nova-ui-radio-input {
+      .@{radio}-input {
         border: 1px solid #ee3388;
       }
     }
@@ -118,23 +150,24 @@ export default {
   }
 
   &:hover:not(.is-disabled) {
-    .nova-ui-radio-input {
+    .@{radio}-input {
       border: 1px solid #ee3388;
     }
   }
 
   &.is-checked {
-    .nova-ui-radio-input {
+    .@{radio}-input {
       border: 1px solid #ee3388;
     }
 
-    .nova-ui-radio-inner {
-      display: block;
+    .@{radio}-inner {
+      opacity: 1;
+      transform: scale(1);
     }
   }
 }
 
-.nova-ui-radio-input {
+.@{radio}-input {
   display: inline-block;
   vertical-align: top;
   width: 14px;
@@ -146,16 +179,18 @@ export default {
   border-radius: 50%;
 }
 
-.nova-ui-radio-inner {
-  display: none;
+.@{radio}-inner {
+  opacity: 0;
   width: 8px;
   height: 8px;
+  transform: scale(0);
+  transition: transform @fast-motion @ease-in-out-circular;
   background-color: #ee3388;
   border-radius: 50%;
   margin: 2px;
 }
 
-.nova-ui-radio-label {
+.@{radio}-label {
   display: inline-block;
   vertical-align: top;
 }

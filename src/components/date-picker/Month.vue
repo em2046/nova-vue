@@ -1,19 +1,19 @@
 <template>
   <div
-    class="nova-ui-date-picker-month"
+    class="nova-date-picker-month"
     :data-month-offset="offset"
     :data-range-active="rangeCurrentPane"
   >
-    <div class="nova-ui-date-picker-header">
+    <div class="nova-date-picker-header">
       <div
-        class="nova-ui-date-picker-prev"
+        class="nova-date-picker-prev"
         :class="getMonthPrevClass()"
         @click="prevMonthClick"
         :title="!isDisabledMonthPrev() ? novaLocale.datePicker.prevMonth : ''"
       >
         {{ novaLocale.datePicker.prevMonth }}
       </div>
-      <div class="nova-ui-date-picker-title">
+      <div class="nova-date-picker-title">
         {{
           novaLocale.datePicker.yearAndMonth(
             getShowMoment().year(),
@@ -22,7 +22,7 @@
         }}
       </div>
       <div
-        class="nova-ui-date-picker-next"
+        class="nova-date-picker-next"
         :class="getMonthNextClass()"
         @click="nextMonthClick"
         :title="!isDisabledMonthNext() ? novaLocale.datePicker.prevMonth : ''"
@@ -30,20 +30,20 @@
         {{ novaLocale.datePicker.nextMonth }}
       </div>
     </div>
-    <div class="nova-ui-date-picker-body">
-      <div class="nova-ui-date-picker-weeks">
+    <div class="nova-date-picker-body">
+      <div class="nova-date-picker-weeks">
         <div
-          class="nova-ui-date-picker-week"
-          :class="'nova-ui-date-picker-' + weeks[titleIndex]"
+          class="nova-date-picker-week"
+          :class="'nova-date-picker-' + weeks[titleIndex]"
           v-for="(title, titleIndex) in weeks"
           :key="titleIndex"
         >
           <template>{{ novaLocale.datePicker.weeksShort[title] }}</template>
         </div>
       </div>
-      <div class="nova-ui-date-picker-dates" ref="datesRef">
+      <div class="nova-date-picker-dates" ref="datesRef">
         <div
-          class="nova-ui-date-picker-date"
+          class="nova-date-picker-date"
           :class="getMomentClassName(dateMoment)"
           v-for="dateMoment in momentList"
           :key="dateMoment.format('YYYY-MM-DD')"
@@ -51,7 +51,9 @@
           @mouseenter="handleDateMouseEnter(dateMoment, $event)"
           @mouseleave="handleDateMouseLeave"
         >
-          <template>{{ getDateDisplay(dateMoment) }}</template>
+          <div class="nova-date-picker-date-inner">
+            {{ getDateDisplay(dateMoment) }}
+          </div>
         </div>
       </div>
     </div>
@@ -59,7 +61,7 @@
 </template>
 
 <script>
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 export default {
   name: 'Month',
@@ -127,7 +129,7 @@ export default {
         if (this.NovaDatePicker.customTooltip) {
           tooltipText = this.NovaDatePicker.customTooltip.call(
             undefined,
-            moment(date).startOf('day')
+            dayjs(date).startOf('day')
           );
         }
 
@@ -143,13 +145,11 @@ export default {
       let firstMomentOfMonth = this.getShowMoment();
 
       let dayOfWeek = firstMomentOfMonth.day();
-      let firstMomentOfPane = firstMomentOfMonth
-        .clone()
-        .subtract(dayOfWeek, 'days');
+      let firstMomentOfPane = firstMomentOfMonth.subtract(dayOfWeek, 'days');
 
       let momentList = new Array(7 * 6).fill(null);
       this.momentList = momentList.map((d, index) => {
-        return firstMomentOfPane.clone().add(index, 'days');
+        return firstMomentOfPane.add(index, 'days');
       });
 
       this.openDefaultTooltip(true);
@@ -189,9 +189,7 @@ export default {
     showDefaultTooltip(first, index, text) {
       function run() {
         let $ref = this.$refs['datesRef'];
-        let $endDate = $ref.querySelectorAll('.nova-ui-date-picker-date')[
-          index
-        ];
+        let $endDate = $ref.querySelectorAll('.nova-date-picker-date')[index];
 
         this.NovaDatePicker.defaultEndTooltip = $endDate;
         if ($endDate) {
@@ -210,7 +208,7 @@ export default {
       }
     },
     getShowMoment() {
-      return this.NovaDatePicker.paneMoment.clone().add(this.offset, 'months');
+      return this.NovaDatePicker.paneMoment.add(this.offset, 'month');
     },
     getMomentClassName(dateMoment) {
       let paneMoment = this.getShowMoment();
@@ -219,20 +217,33 @@ export default {
       let isDisabled = this.isDisabled(dateMoment);
       let isSelected = false;
       let isInRange = false;
-      let isRangeEndHover = false;
-      let isInHoverRange = false;
+      let isRangeHoverStart = false;
+      let isRangeHoverEnd = false;
+      let isRangeHover = false;
       let isPrev = false;
       let isNext = false;
+      let isRangeStart = false;
+      let isRangeEnd = false;
+      let isRangeStartSingle = false;
+      let isRangeEndSingle = false;
 
       if (this.NovaDatePicker.isRange) {
         let startMoment = selectedMoment[0];
         let endMoment = selectedMoment[1];
 
-        let isStartMoment = this.isSameDate(startMoment, dateMoment);
-        let isEndMoment = this.isSameDate(endMoment, dateMoment);
+        isRangeStart = this.isSameDateMoment(startMoment, dateMoment);
+        isRangeEnd = this.isSameDateMoment(endMoment, dateMoment);
         let isEndPane = this.rangeCurrentPane === 1;
 
-        if (isStartMoment || (isEndMoment && isEndPane)) {
+        if (startMoment && !endMoment) {
+          isRangeStartSingle = true;
+        }
+
+        if (!startMoment && endMoment) {
+          isRangeEndSingle = true;
+        }
+
+        if (isRangeStart || (isRangeEnd && isEndPane)) {
           isSelected = true;
         } else if (startMoment && endMoment) {
           if (
@@ -245,19 +256,22 @@ export default {
         if (isEndPane && !isDisabled) {
           let hoverDate = this.NovaDatePicker.hoverDate;
           if (hoverDate) {
-            let hoverMoment = moment(hoverDate);
-            isRangeEndHover = hoverMoment.isSame(dateMoment);
+            let hoverMoment = dayjs(hoverDate);
+            isRangeHoverEnd = hoverMoment.isSame(dateMoment);
             if (
               startMoment &&
               startMoment.isBefore(dateMoment) &&
               hoverMoment.isAfter(dateMoment)
             ) {
-              isInHoverRange = true;
+              isRangeHover = true;
+            }
+            if (startMoment && startMoment.isSame(dateMoment)) {
+              isRangeHoverStart = true;
             }
           }
         }
       } else {
-        if (this.isSameDate(selectedMoment, dateMoment)) {
+        if (this.isSameDateMoment(selectedMoment, dateMoment)) {
           isSelected = true;
         }
       }
@@ -268,16 +282,23 @@ export default {
       }
 
       let isSpecial = !!this.NovaDatePicker.getSpecialText(dateMoment);
+      let isToday = this.NovaDatePicker.isToday(dateMoment);
 
       return {
         'is-prev': isPrev,
         'is-next': isNext,
         'is-in-range': isInRange,
-        'is-range-end-hover': isRangeEndHover,
-        'is-in-hover-range': isInHoverRange,
+        'is-range-start': isRangeStart,
+        'is-range-start-single': isRangeStartSingle,
+        'is-range-end': isRangeEnd,
+        'is-range-end-single': isRangeEndSingle,
+        'is-range-hover': isRangeHover,
+        'is-range-hover-start': isRangeHoverStart,
+        'is-range-hover-end': isRangeHoverEnd,
         'is-disabled': isDisabled,
         'is-selected': isSelected,
-        'is-special': isSpecial
+        'is-special': isSpecial,
+        'is-today': isToday
       };
     },
     isDisabled(dateMoment) {
@@ -301,21 +322,21 @@ export default {
       );
       return userDisabled || rangeDisabled;
     },
-    isSameDate(a, b) {
-      if (!moment.isMoment(a)) {
+    isSameDateMoment(a, b) {
+      if (!dayjs.isDayjs(a)) {
         return false;
       }
-      if (!moment.isMoment(b)) {
+      if (!dayjs.isDayjs(b)) {
         return false;
       }
       return a.isSame(b, 'day');
     },
     prevMonthClick() {
-      let paneMoment = this.NovaDatePicker.paneMoment.clone().add(-1, 'months');
+      let paneMoment = this.NovaDatePicker.paneMoment.add(-1, 'month');
       this.NovaDatePicker.updateShowDate(paneMoment.toDate());
     },
     nextMonthClick() {
-      let paneMoment = this.NovaDatePicker.paneMoment.clone().add(1, 'months');
+      let paneMoment = this.NovaDatePicker.paneMoment.add(1, 'month');
       this.NovaDatePicker.updateShowDate(paneMoment.toDate());
     },
     isDisabledMonthPrev() {
@@ -359,7 +380,11 @@ export default {
 </script>
 
 <style lang="less">
-.nova-ui-date-picker-month {
+@import '../../styles/var';
+
+@date-picket: @{prefixed}-date-picker;
+
+.@{date-picket}-month {
   white-space: normal;
   vertical-align: top;
   display: inline-block;
@@ -372,26 +397,89 @@ export default {
   }
 
   &[data-range-active='1'] {
-    .nova-ui-date-picker-date.is-in-range:not(.is-disabled):not(.is-selected) {
-      background-color: #fcdaed;
-
-      &:hover:not(.is-disabled):not(.is-selected) {
-        background-color: #fef2f9;
-        color: #ee3388;
+    .@{date-picket}-date {
+      &:before {
+        position: absolute;
+        content: '';
+        display: block;
+        width: 30px;
+        height: 26px;
       }
     }
 
-    .nova-ui-date-picker-date.is-in-hover-range:not(.is-disabled):not(.is-selected) {
-      background-color: #fcdaed;
+    .@{date-picket}-date.is-range-start:not(.is-range-start-single) {
+      &:before {
+        background-color: #fcdaed;
+        width: 2px;
+        right: 0;
+      }
+    }
+
+    .@{date-picket}-date.is-range-end {
+      &:before {
+        background-color: #fcdaed;
+      }
+
+      &:not(.is-range-hover) {
+        &:before {
+          width: 2px;
+        }
+      }
+    }
+
+    .@{date-picket}-date.is-range-hover-end:not(.is-in-range) {
+      &:before {
+        width: 2px;
+        background-color: #fcdaed;
+      }
+    }
+
+    .@{date-picket}-date.is-range-hover-start:not(.is-in-range) {
+      &:before {
+        right: 0;
+        width: 2px;
+        background-color: #fcdaed;
+      }
+    }
+
+    .@{date-picket}-date.is-range-start.is-range-end {
+      &:before {
+        width: 0;
+      }
+    }
+
+    .@{date-picket}-date.is-range-start.is-range-end.is-range-hover-start {
+      &:before {
+        width: 2px;
+      }
+    }
+
+    .@{date-picket}-date.is-range-start.is-range-end.is-range-hover-start.is-range-hover-end,
+    .@{date-picket}-date.is-range-start.is-range-start-single.is-range-hover-start.is-range-hover-end {
+      &:before {
+        width: 0;
+      }
+    }
+
+    .@{date-picket}-date.is-in-range:not(.is-disabled):not(.is-selected) {
+      &:before {
+        background-color: #fcdaed;
+      }
+    }
+
+    .@{date-picket}-date.is-range-hover:not(.is-disabled):not(.is-selected):not(.is-in-range) {
+      &:before {
+        background-color: #fcdaed;
+      }
     }
   }
 }
 
-.nova-ui-date-picker-body {
+.@{date-picket}-body {
   padding: 4px;
 }
 
-.nova-ui-date-picker-header {
+.@{date-picket}-header {
   text-align: center;
   height: 28px;
   margin: -1px -1px 0 -1px;
@@ -399,8 +487,8 @@ export default {
   background-color: #ee3388;
 }
 
-.nova-ui-date-picker-prev,
-.nova-ui-date-picker-next {
+.@{date-picket}-prev,
+.@{date-picket}-next {
   display: inline-block;
   vertical-align: top;
   width: 28px;
@@ -429,7 +517,7 @@ export default {
   }
 }
 
-.nova-ui-date-picker-prev {
+.@{date-picket}-prev {
   float: left;
 
   &:before {
@@ -437,7 +525,7 @@ export default {
   }
 }
 
-.nova-ui-date-picker-next {
+.@{date-picket}-next {
   float: right;
 
   &:before {
@@ -445,7 +533,7 @@ export default {
   }
 }
 
-.nova-ui-date-picker-title {
+.@{date-picket}-title {
   font-size: 14px;
   padding: 4px;
   box-sizing: border-box;
@@ -454,52 +542,78 @@ export default {
   vertical-align: top;
 }
 
-.nova-ui-date-picker-weeks,
-.nova-ui-date-picker-dates {
+.@{date-picket}-weeks,
+.@{date-picket}-dates {
   width: 30 * 7px;
 }
 
-.nova-ui-date-picker-week,
-.nova-ui-date-picker-date {
+.@{date-picket}-week,
+.@{date-picket}-date {
+  box-sizing: border-box;
   width: 30px;
-  height: 20px;
-  padding: 5px 0;
   display: inline-block;
   vertical-align: top;
 }
 
-.nova-ui-date-picker-week {
-  &.nova-ui-date-picker-sun,
-  &.nova-ui-date-picker-sat {
+.@{date-picket}-week {
+  height: 28px;
+  margin-bottom: 2px;
+  background-color: #eee;
+  padding: 4px 0;
+
+  &.@{date-picket}-sun,
+  &.@{date-picket}-sat {
     color: #ee3388;
   }
 }
 
-.nova-ui-date-picker-date {
+.@{date-picket}-date {
+  position: relative;
   cursor: pointer;
+  height: 30px;
+  padding: 2px 0;
 
   &.is-special {
-    color: #ee3388;
+    .@{date-picket}-date-inner {
+      color: #ee3388;
+    }
+  }
+
+  &.is-today {
+    .@{date-picket}-date-inner {
+      color: #ee3388;
+      border: 1px solid #ee3388;
+      padding: 2px 0;
+    }
   }
 
   &:hover:not(.is-disabled):not(.is-selected) {
-    background-color: #fef2f9;
-    color: #ee3388;
+    .@{date-picket}-date-inner {
+      background-color: #fef2f9;
+      color: #ee3388;
+    }
   }
 
   &.is-selected {
-    background-color: #ff77bb;
-    color: #fff;
+    .@{date-picket}-date-inner {
+      background-color: #ff77bb;
+      color: #fff;
+    }
   }
 
   &.is-disabled {
-    opacity: 0.35;
     cursor: default;
+
+    .@{date-picket}-date-inner {
+      opacity: 0.35;
+    }
   }
 
-  &.is-range-end-hover {
-    background-color: #ff77bb;
-    color: #fff;
+  &.is-range-hover-end {
+    .@{date-picket}-date-inner {
+      background-color: #ff77bb;
+      color: #fff;
+    }
   }
 
   &.is-prev,
@@ -508,10 +622,18 @@ export default {
   }
 }
 
-.nova-ui-date-picker-weeks {
-  background-color: #eee;
+.@{date-picket}-date-inner {
+  position: relative;
+  box-sizing: border-box;
+  width: 26px;
+  height: 26px;
+  padding: 3px 0;
+  margin: 0 auto;
 }
 
-.nova-ui-date-picker-dates {
+.@{date-picket}-weeks {
+}
+
+.@{date-picket}-dates {
 }
 </style>

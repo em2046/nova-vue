@@ -1,6 +1,6 @@
 <template>
-  <div class="nova-ui-calendar" v-bind="$attrs" v-on="$listeners">
-    <div class="nova-ui-calendar-months">
+  <div class="nova-calendar" v-bind="$attrs" v-on="$listeners">
+    <div class="nova-calendar-months">
       <Month
         ref="monthRef"
         :nova-locale="novaLocale"
@@ -23,10 +23,10 @@
 </template>
 
 <script>
-import moment from 'moment';
+import dayjs from 'dayjs';
 import Calendar from '@/utils/calendar';
 import locale from '@/mixin/locale';
-import Month from '@/components/calendar/Month';
+import Month from './Month';
 
 export default {
   name: 'NovaCalendar',
@@ -68,9 +68,9 @@ export default {
     }
   },
   data() {
-    let defaultDate = moment();
+    let defaultDate = dayjs();
     if (this.value) {
-      defaultDate = moment(this.value);
+      defaultDate = dayjs(this.value);
     }
     let first = Calendar.getFirstDateMomentOfMonth(defaultDate);
     this.$emit('update', first.toDate());
@@ -90,7 +90,7 @@ export default {
       if (!date) {
         return;
       }
-      if (moment.isDate(date)) {
+      if (dayjs(date).isValid()) {
         this.paneMoment = Calendar.getFirstDateMomentOfMonth(date);
       }
 
@@ -114,7 +114,9 @@ export default {
 <style lang="less">
 @import '../../styles/var';
 
-.nova-ui-calendar {
+@calendar: @{prefixed}-calendar;
+
+.@{calendar} {
   width: 1196px;
   font-family: @font-family;
   font-size: 12px;

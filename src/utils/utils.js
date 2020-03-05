@@ -4,7 +4,7 @@ export default class Utils {
    * @param stopEl Stop calc parent
    * @returns {{top: number, left: number}}
    */
-  static getElementOffset(el, stopEl) {
+  static getElementOffset(el, stopEl = null) {
     let left = 0;
     let top = 0;
 
@@ -52,5 +52,24 @@ export default class Utils {
       }
     }
     return to;
+  }
+
+  /**
+   * @param ele DOM
+   * @param className
+   */
+  static hasClassName(ele, className) {
+    if (!ele || !className) {
+      return false;
+    }
+
+    let targetClassName = ele.getAttribute('class');
+    if (!targetClassName) {
+      return false;
+    }
+
+    return targetClassName
+      .split(' ')
+      .some(singleClassName => singleClassName === className);
   }
 }

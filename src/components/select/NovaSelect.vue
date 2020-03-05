@@ -1,62 +1,66 @@
 <template>
   <div
     ref="select"
-    class="nova-ui-select"
+    class="nova-select"
     :class="selectClass"
     v-bind="$attrs"
     v-on="$listeners"
     :tabindex="!disabled ? 0 : -1"
   >
-    <div class="nova-ui-select-toggle" @click="handleToggleClick">
-      <span class="nova-ui-select-arrow"></span>
+    <div class="nova-select-toggle" @click="handleToggleClick">
+      <span class="nova-select-arrow"></span>
       <template v-if="multiple === false">
         <span
-          class="nova-ui-select-text nova-ui-select-placeholder"
+          class="nova-select-text nova-select-placeholder"
           v-if="!hasValue()"
         >
           {{ getPlaceholder() }}
         </span>
-        <span class="nova-ui-select-text" v-if="hasValue()">
+        <span class="nova-select-text" v-if="hasValue()">
           {{ displayedLabel() || value }}
         </span>
       </template>
       <template v-if="multiple === true && value">
         <span
-          class="nova-ui-select-text nova-ui-select-placeholder"
+          class="nova-select-text nova-select-placeholder"
           v-if="!value.length"
         >
           {{ getPlaceholder() }}
         </span>
-        <div class="nova-ui-select-labels" v-if="value.length">
-          <span class="nova-ui-select-label" v-for="v in value" :key="v">
-            <span>{{ valueToLabel(v) || v }}</span>
-            <span
-              class="nova-ui-select-label-delete"
-              :class="{ 'is-disabled': disabled }"
-              @click="handleDeleteClick(v)"
-            ></span>
-          </span>
+        <div class="nova-select-labels">
+          <transition-group
+            name="nova-zoom"
+            @after-leave="handleTransitionFinished"
+            @enter="handleTransitionFinished"
+          >
+            <span class="nova-select-label" v-for="v in value" :key="v">
+              <span>{{ valueToLabel(v) || v }}</span>
+              <span
+                class="nova-select-label-delete"
+                :class="{ 'is-disabled': disabled }"
+                @click="handleDeleteClick(v)"
+              ></span>
+            </span>
+          </transition-group>
         </div>
       </template>
     </div>
 
-    <div>
-      <NovaDropdown
-        ref="dropdown"
-        :opened="opened"
-        :append-to-body="appendToBody"
-        :popover-class="['nova-ui-select-dropdown', popoverClass]"
-      >
-        <slot></slot>
-      </NovaDropdown>
-    </div>
+    <NovaDropdown
+      ref="dropdown"
+      :opened="opened"
+      :append-to-body="appendToBody"
+      :popover-class="['nova-select-dropdown', popoverClass]"
+    >
+      <slot></slot>
+    </NovaDropdown>
   </div>
 </template>
 
 <script>
-import NovaDropdown from '../dropdown/NovaDropdown';
-import locale from '@/mixin/locale';
 import Utils from '@/utils/utils';
+import locale from '@/mixin/locale';
+import NovaDropdown from '@/components/dropdown/NovaDropdown';
 
 export default {
   name: 'NovaSelect',
@@ -156,7 +160,7 @@ export default {
       }
       return '';
     },
-    setValue(value) {
+    setSelected(value) {
       if (this.multiple) {
         let newValue = this.value.slice();
         let foundIndex = newValue.findIndex(v => {
@@ -171,8 +175,10 @@ export default {
         this.$emit('update', newValue);
         this.$emit('change', newValue);
       } else {
-        this.$emit('update', value);
-        this.$emit('change', value);
+        if (this.value !== value) {
+          this.$emit('update', value);
+          this.$emit('change', value);
+        }
       }
     },
     getValue() {
@@ -182,8 +188,14 @@ export default {
       this.opened = false;
       this.closeDropdown();
     },
-    handleToggleClick() {
+    handleToggleClick(e) {
       if (this.disabled) {
+        return;
+      }
+
+      let target = e.target;
+      let isDelete = Utils.hasClassName(target, 'nova-select-label-delete');
+      if (isDelete) {
         return;
       }
 
@@ -197,11 +209,17 @@ export default {
     openDropdown() {
       document.addEventListener('click', this.handleOtherClick);
       this.$emit('open');
+      this.refreshDropdown();
+    },
+    refreshDropdown() {
       if (this.appendToBody) {
         let select = this.$refs['select'];
         let dropdown = this.$refs['dropdown'];
         dropdown.setPosition(select);
       }
+    },
+    handleTransitionFinished() {
+      this.refreshDropdown();
     },
     closeDropdown() {
       document.removeEventListener('click', this.handleOtherClick);
@@ -226,7 +244,7 @@ export default {
         return;
       }
 
-      this.setValue(value);
+      this.setSelected(value);
     },
     getDropdownDom() {
       return this.$refs['dropdown'].getDom();
@@ -238,7 +256,9 @@ export default {
 <style lang="less">
 @import '../../styles/var';
 
-.nova-ui-select {
+@select: @{prefixed}-select;
+
+.@{select} {
   width: 200px;
   vertical-align: top;
   display: inline-block;
@@ -250,11 +270,11 @@ export default {
     outline: none;
 
     &:not(.is-disabled) {
-      .nova-ui-select-toggle {
+      .@{select}-toggle {
         border: 1px solid #aaaaaa;
       }
 
-      .nova-ui-select-arrow {
+      .@{select}-arrow {
         border-left: 1px solid #cccccc;
       }
     }
@@ -264,19 +284,22 @@ export default {
     opacity: 0.5;
     background-color: #eee;
 
-    .nova-ui-select-toggle {
+    .@{select}-toggle {
       cursor: default;
+    }
+
+    .@{select}-label {
+      background-color: #eee;
     }
   }
 
   &.is-open {
-    .nova-ui-select-toggle {
+    .@{select}-toggle {
       background-color: #fff;
-      position: relative;
       z-index: 1;
     }
 
-    .nova-ui-select-arrow {
+    .@{select}-arrow {
       &:before {
         transform: rotate(180deg);
       }
@@ -284,44 +307,60 @@ export default {
   }
 }
 
-.nova-ui-select-toggle {
+.@{select}-toggle {
+  position: relative;
   cursor: pointer;
   display: block;
   border: 1px solid #cccccc;
   min-height: 28px;
+  padding-right: 23px;
 }
 
-.nova-ui-select-text {
-  display: inline-block;
+.@{select}-text {
+  display: block;
   vertical-align: top;
   padding: 4px 10px;
+  .ellipsis();
 }
 
-.nova-ui-select-placeholder {
+.@{select}-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 23px;
   opacity: 0.5;
+  .ellipsis();
 }
 
-.nova-ui-select-labels {
+.@{select}-labels {
   padding: 2px;
 }
 
-.nova-ui-select-label {
+.@{select}-label {
+  max-width: calc(100% - 4px);
+  box-sizing: border-box;
+  background-color: #fff;
+  position: relative;
   display: inline-block;
   vertical-align: top;
   margin: 2px;
   line-height: 18px;
-  padding: 0 4px;
+  padding: 0 18px 0 4px;
   border: 1px solid #ccc;
+  .ellipsis();
 }
 
-.nova-ui-select-label-delete {
+.@{select}-label-delete {
+  position: absolute;
+  right: 0;
+  top: 0;
   width: 12px;
   height: 12px;
   border-radius: 50%;
   background-color: #ccc;
   display: inline-block;
   vertical-align: top;
-  margin: 3px 0 0 3px;
+  margin: 3px;
   text-align: center;
   line-height: 12px;
 
@@ -351,19 +390,23 @@ export default {
   }
 }
 
-.nova-ui-select-arrow {
-  float: right;
-  vertical-align: top;
-  width: 24px;
-  height: 20px;
-  margin-top: 4px;
+.@{select}-arrow {
+  position: absolute;
+  display: block;
+  top: 4px;
+  box-sizing: border-box;
+  bottom: 4px;
+  right: 0;
+  width: 23px;
   border-left: 1px solid #eeeeee;
-  display: inline-block;
   text-align: center;
 
   &:before {
+    position: absolute;
+    left: 50%;
+    top: 50%;
     vertical-align: top;
-    margin-top: 8px;
+    margin: -2px -4px;
     content: '';
     width: 0;
     height: 0;
@@ -375,15 +418,15 @@ export default {
 }
 
 @supports (transform-style: preserve-3d) {
-  .nova-ui-select-arrow {
+  .@{select}-arrow {
     &:before {
-      transition: transform 200ms;
+      transition: transform @normal-motion;
     }
   }
 
-  .nova-ui-select {
+  .@{select} {
     &.is-open {
-      .nova-ui-select-arrow {
+      .@{select}-arrow {
         &:before {
           transform: rotate3d(1, 0, 0, 180deg);
         }

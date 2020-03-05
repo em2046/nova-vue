@@ -1,7 +1,8 @@
 import Vue from 'vue';
 import glob from 'glob';
 import { mount } from '@vue/test-utils';
-
+import ClientOnly from '../__mocks__/lib/ClientOnly';
+import MountingPortal from '../__mocks__/lib/MountingPortal';
 import nova, {
   NovaLocale,
   NovaSelect,
@@ -16,7 +17,10 @@ import nova, {
   NovaRadioGroup,
   NovaCheckbox,
   NovaCheckboxGroup
-} from '../..';
+} from '../../src/index';
+
+Vue.component('ClientOnly', ClientOnly);
+Vue.component('MountingPortal', MountingPortal);
 
 global.nova = nova;
 

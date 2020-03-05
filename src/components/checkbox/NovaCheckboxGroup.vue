@@ -1,7 +1,7 @@
 <template>
   <div
     ref="checkbox-group"
-    class="nova-ui-checkbox-group"
+    class="nova-checkbox-group"
     v-bind="$attrs"
     v-on="$listeners"
   >
@@ -28,27 +28,47 @@ export default {
     }
   },
   methods: {
-    setCheck(value, state) {
-      let newValue = this.value;
+    setChecked(checkedValue, checked, trigger) {
+      let newValue;
+      let found = this.value.find(item => {
+        return item === checkedValue;
+      });
 
-      if (state) {
-        let found = this.value.find(item => {
-          return item === value;
-        });
+      if (checked) {
         if (found) {
           return;
         }
 
-        newValue = this.value.concat([value]);
+        newValue = this.value.concat([checkedValue]);
       } else {
+        if (!found) {
+          return;
+        }
         newValue = this.value.filter(item => {
-          return item !== value;
+          return item !== checkedValue;
         });
       }
 
       this.$emit('update', newValue);
-      this.$emit('change', newValue);
+      if (trigger) {
+        this.$emit('change', newValue);
+      }
     }
   }
 };
 </script>
+
+<style lang="less">
+@import '../../styles/var';
+
+@checkbox: @{prefixed}-checkbox;
+
+.@{checkbox}-group {
+  display: inline-block;
+  line-height: 20px;
+
+  .@{checkbox} {
+    margin-right: 10px;
+  }
+}
+</style>
