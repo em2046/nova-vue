@@ -1,8 +1,11 @@
 let en = {
   select: {
-    placeholder: 'Select...'
+    placeholder: 'Select'
   },
   datePicker: {
+    night: 'Night',
+    placeholder: 'Select date',
+    rangePlaceholder: ['Start date', 'End date'],
     yearAndMonth: (year, month) => {
       return `${en.datePicker.months[month]} ${year}`;
     },
@@ -10,7 +13,6 @@ let en = {
     prevMonth: 'Previous month',
     nextMonth: 'Next month',
     year: 'Year',
-    night: 'Night',
     weeksShort: {
       sun: 'Sun',
       mon: 'Mon',

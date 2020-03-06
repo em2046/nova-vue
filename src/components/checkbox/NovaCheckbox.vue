@@ -123,11 +123,11 @@ export default {
 .@{checkbox} {
   cursor: pointer;
   line-height: 20px;
-  color: #333333;
   display: inline-block;
   vertical-align: top;
   font-size: 12px;
   font-family: @font-family;
+  color: @font-color;
 
   &:focus {
     outline: none;
@@ -169,8 +169,7 @@ export default {
   vertical-align: top;
   width: 14px;
   height: 14px;
-  margin-top: 3px;
-  margin-right: 4px;
+  margin-top: 8px;
   border: 1px solid #cccccc;
   box-sizing: border-box;
   position: relative;
@@ -197,5 +196,6 @@ export default {
 .@{checkbox}-label {
   display: inline-block;
   vertical-align: top;
+  padding: 5px;
 }
 </style>

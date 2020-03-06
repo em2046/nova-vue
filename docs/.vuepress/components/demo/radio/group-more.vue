@@ -23,15 +23,11 @@ export default {
 .group-more {
   .nova-radio {
     display: block;
-    line-height: 30px;
-
-    /deep/ .nova-radio-input {
-      margin-top: 8px;
-    }
   }
 }
 
 .more-input {
   width: 100px;
+  height: 20px;
 }
 </style>

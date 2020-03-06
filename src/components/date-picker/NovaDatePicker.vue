@@ -7,7 +7,11 @@
     ref="date-picker"
   >
     <div class="nova-date-picker-toggle" v-if="!isRange">
-      <div class="nova-date-picker-inner" ref="inner">
+      <div
+        class="nova-date-picker-inner"
+        :class="{ 'is-disabled': isDisabled }"
+        ref="inner"
+      >
         <input
           autocomplete="off"
           class="nova-date-picker-input"
@@ -15,33 +19,20 @@
           :value="displayedDate"
           readonly
           :disabled="disabled"
-          :placeholder="placeholder"
+          :placeholder="datePlaceholder"
           @focus="handleInputFocus"
           @blur="handleInputBlur"
+          @click="handleInputClick"
           ref="input"
         />
-        <span
-          class="nova-date-picker-overlay nova-date-picker-prefix"
-          v-if="showPrefix"
-        >
-          <slot name="prefix"></slot>
-        </span>
-        <span
-          class="nova-date-picker-overlay nova-date-picker-suffix"
-          v-if="showSuffix"
-        >
-          <slot name="suffix">
-            {{ getSuffixText(value) }}
-          </slot>
-        </span>
         <span class="nova-date-picker-icon" v-if="showIcon"></span>
       </div>
     </div>
     <div class="nova-date-picker-toggle" v-if="isRange">
       <div
-        class="nova-date-picker-inner nova-date-range-start"
+        class="nova-date-picker-inner nova-date-picker-range-start"
         :class="{
-          'nova-date-picker-inner-fake-disabled': startFakeDisabled
+          'is-disabled': startDisabled
         }"
         ref="start"
       >
@@ -51,43 +42,19 @@
           type="text"
           :value="displayedRange.start"
           readonly
-          :disabled="disabled"
-          :placeholder="getStartPlaceholder"
-          v-if="!startFakeDisabled"
+          :disabled="startDisabled"
+          :placeholder="startPlaceholder"
           @focus="handleStartFocus"
           @blur="handleStartBlur"
-          @click="handleStartClick"
           ref="startInput"
         />
-        <input
-          autocomplete="off"
-          class="nova-date-picker-input"
-          readonly
-          @focus="handleStartFocus"
-          @blur="handleStartBlur"
-          @click="handleStartClick"
-          v-if="startFakeDisabled"
-          :placeholder="getStartPlaceholder"
-        />
-        <span
-          class="nova-date-picker-overlay nova-date-picker-prefix"
-          v-if="showPrefix"
-        >
-          <slot range="start" name="prefix"></slot>
-        </span>
-        <span
-          class="nova-date-picker-overlay nova-date-picker-suffix"
-          v-if="showSuffix"
-        >
-          <slot range="start" name="suffix">
-            {{ getSuffixText(value[0]) }}
-          </slot>
-        </span>
         <span class="nova-date-picker-icon" v-if="showIcon"></span>
       </div>
       <div
-        class="nova-date-picker-inner nova-date-range-end"
-        :class="{ 'nova-date-picker-inner-fake-disabled': endFakeDisabled }"
+        class="nova-date-picker-inner nova-date-picker-range-end"
+        :class="{
+          'is-disabled': endDisabled
+        }"
         ref="end"
       >
         <input
@@ -96,38 +63,12 @@
           type="text"
           :value="displayedRange.end"
           readonly
-          :disabled="disabled"
-          :placeholder="getEndPlaceholder"
-          v-if="!endFakeDisabled"
+          :disabled="endDisabled"
+          :placeholder="endPlaceholder"
           @focus="handleEndFocus"
           @blur="handleEndBlur"
-          @click="handleEndClick"
           ref="endInput"
         />
-        <input
-          autocomplete="off"
-          class="nova-date-picker-input nova-date-picker-input-fake-disabled"
-          readonly
-          @focus="handleEndFocus"
-          @blur="handleEndBlur"
-          @click="handleEndClick"
-          v-if="endFakeDisabled"
-          :placeholder="getEndPlaceholder"
-        />
-        <span
-          class="nova-date-picker-overlay nova-date-picker-prefix"
-          v-if="showPrefix"
-        >
-          <slot range="end" name="prefix"></slot>
-        </span>
-        <span
-          class="nova-date-picker-overlay nova-date-picker-suffix"
-          v-if="showSuffix"
-        >
-          <slot range="end" name="suffix">
-            {{ getSuffixText(value[1]) }}
-          </slot>
-        </span>
         <span class="nova-date-picker-icon" v-if="showIcon"></span>
       </div>
     </div>
@@ -188,29 +129,15 @@ export default {
   props: {
     value: {},
     placeholder: {
-      type: String,
-      default: ''
-    },
-    startPlaceholder: {
-      type: String
-    },
-    endPlaceholder: {
-      type: String
+      type: [String, Array],
+      default: undefined
     },
     format: {
       type: String,
       default: Calendar.defaultFormat
     },
     disabled: {
-      type: Boolean,
-      default: false
-    },
-    startFakeDisabled: {
-      type: Boolean,
-      default: false
-    },
-    endFakeDisabled: {
-      type: Boolean,
+      type: [Boolean, Array],
       default: false
     },
     appendToBody: {
@@ -224,21 +151,13 @@ export default {
     monthSize: {
       type: Number
     },
-    showPrefix: {
-      type: Boolean,
-      default: false
-    },
     showIcon: {
       type: Boolean,
       default: true
     },
-    showSuffix: {
-      type: Boolean,
-      default: false
-    },
     showTooltip: {
       type: Boolean,
-      default: true
+      default: false
     },
     customTooltip: {
       type: Function,
@@ -276,7 +195,7 @@ export default {
       weeks: Calendar.weeks,
       paneMoment: first,
       opened: false,
-      rangeCurrentPane: 0,
+      rangeIndex: 0,
       hoverDate: null,
       defaultEndTooltip: null,
       tooltip: {
@@ -293,8 +212,32 @@ export default {
     datePickerClass() {
       return {
         'is-open': this.opened,
-        'is-disabled': this.disabled
+        'nova-date-picker-range': this.isRange
       };
+    },
+    isDisabled() {
+      let disabled = this.disabled;
+      let isArray = Array.isArray(disabled);
+      if (!isArray) {
+        return disabled;
+      }
+      return false;
+    },
+    startDisabled() {
+      let disabled = this.disabled;
+      let isArray = Array.isArray(disabled);
+      if (!isArray) {
+        return disabled;
+      }
+      return disabled[0];
+    },
+    endDisabled() {
+      let disabled = this.disabled;
+      let isArray = Array.isArray(disabled);
+      if (!isArray) {
+        return disabled;
+      }
+      return disabled[1];
     },
     showMonthSize() {
       if (this.monthSize) {
@@ -307,6 +250,20 @@ export default {
     },
     isRange() {
       return this.type === 'range';
+    },
+    rangeName() {
+      if (!this.isRange) {
+        return null;
+      }
+
+      switch (this.rangeIndex) {
+        case 0:
+          return 'start';
+        case 1:
+          return 'end';
+        default:
+          return this.rangeIndex;
+      }
     },
     displayedDate() {
       let date = this.value;
@@ -331,19 +288,48 @@ export default {
         return this.dateToMoment(date);
       }
     },
-    getStartPlaceholder() {
-      let startPlaceholder = this.startPlaceholder;
-      if (startPlaceholder === undefined) {
-        startPlaceholder = this.placeholder;
+    datePlaceholder() {
+      let novaLocale = this.novaLocale;
+
+      let placeholder = this.placeholder;
+      if (placeholder === undefined) {
+        return novaLocale.datePicker.placeholder;
       }
-      return startPlaceholder;
+      return placeholder;
     },
-    getEndPlaceholder() {
-      let endPlaceholder = this.endPlaceholder;
-      if (endPlaceholder === undefined) {
-        endPlaceholder = this.placeholder;
+    startPlaceholder() {
+      let novaLocale = this.novaLocale;
+
+      let placeholder = this.placeholder;
+      if (
+        placeholder === undefined ||
+        (placeholder && placeholder[0] === undefined)
+      ) {
+        return novaLocale.datePicker.rangePlaceholder[0];
       }
-      return endPlaceholder;
+
+      let isArray = Array.isArray(placeholder);
+      if (isArray) {
+        return placeholder[0];
+      }
+      return placeholder;
+    },
+    endPlaceholder() {
+      let novaLocale = this.novaLocale;
+
+      let placeholder = this.placeholder;
+      if (
+        placeholder === undefined ||
+        (placeholder && placeholder[1] === undefined)
+      ) {
+        return novaLocale.datePicker.rangePlaceholder[1];
+      }
+
+      let isArray = Array.isArray(placeholder);
+      if (isArray) {
+        return placeholder[1];
+      }
+      return placeholder;
     }
   },
   mounted() {
@@ -397,6 +383,10 @@ export default {
         return;
       }
 
+      if (this.opened) {
+        return;
+      }
+
       this.opened = true;
       let inner = this.$refs['inner'];
       this.updateShowDate(this.value);
@@ -410,56 +400,54 @@ export default {
 
       this.$emit('focus', e);
     },
+    handleInputClick() {
+      if (this.disabled) {
+        return;
+      }
+      this.openImplement();
+    },
     openStartImplement: function() {
       clearTimeout(this.startBlurTimer);
       clearTimeout(this.endBlurTimer);
 
-      if (this.disabled) {
+      if (this.startDisabled) {
         return;
       }
 
-      this.rangeCurrentPane = 0;
+      this.rangeIndex = 0;
       this.opened = true;
       let start = this.$refs['start'];
       this.updateShowDate(this.value[0]);
       this.openDropdown(start);
     },
     handleStartFocus(e) {
-      if (this.disabled) {
+      if (this.startDisabled) {
         return;
       }
       this.openStartImplement();
 
-      this.$emit('startFocus', e);
-      this.$emit('focus', e);
-    },
-    handleStartClick(e) {
-      this.$emit('startClick', e);
+      this.$emit('focus', e, 'start');
     },
     openEndImplement: function() {
       clearTimeout(this.startBlurTimer);
       clearTimeout(this.endBlurTimer);
 
-      if (this.disabled) {
+      if (this.endDisabled) {
         return;
       }
-      this.rangeCurrentPane = 1;
+      this.rangeIndex = 1;
       this.opened = true;
       let end = this.$refs['end'];
       this.updateShowDate(this.value[1]);
       this.openDropdown(end);
     },
     handleEndFocus(e) {
-      if (this.disabled) {
+      if (this.endDisabled) {
         return;
       }
       this.openEndImplement();
 
-      this.$emit('endFocus', e);
-      this.$emit('focus', e);
-    },
-    handleEndClick(e) {
-      this.$emit('endClick', e);
+      this.$emit('focus', e, 'end');
     },
     handleInputBlur(e) {
       clearTimeout(this.blurTimer);
@@ -476,8 +464,7 @@ export default {
       this.startBlurTimer = setTimeout(() => {
         this.close();
       }, 200);
-      this.$emit('startBlur', e);
-      this.$emit('blur', e);
+      this.$emit('blur', e, 'start');
     },
     handleEndBlur(e) {
       clearTimeout(this.endBlurTimer);
@@ -485,24 +472,27 @@ export default {
       this.endBlurTimer = setTimeout(() => {
         this.close();
       }, 200);
-      this.$emit('endBlur', e);
-      this.$emit('blur', e);
+      this.$emit('blur', e, 'end');
     },
     openDropdown(inner) {
       document.addEventListener('click', this.handleOtherClick);
-      this.$emit('open');
+      this.$emit('open', this.rangeName);
       if (this.appendToBody) {
         let dropdown = this.$refs['dropdown'];
         dropdown.setPosition(inner);
       }
     },
     close() {
+      if (!this.opened) {
+        return;
+      }
+
       this.opened = false;
       this.closeDropdown();
     },
     closeDropdown() {
       document.removeEventListener('click', this.handleOtherClick);
-      this.$emit('close');
+      this.$emit('close', this.rangeName);
     },
     handleOtherClick(e) {
       let $datePicker = this.$refs['date-picker'];
@@ -552,17 +542,17 @@ export default {
       }, 50);
     },
     handleRangeSelect(dateMoment) {
-      let rangeCurrentPane = this.rangeCurrentPane;
+      let rangeIndex = this.rangeIndex;
 
       let oldStartDate = this.value[0];
       let oldEndDate = this.value[1];
 
       let dateRange = [oldStartDate, oldEndDate];
-      dateRange[rangeCurrentPane] = dateMoment.toDate();
+      dateRange[rangeIndex] = dateMoment.toDate();
 
       let newStartDate = dateRange[0];
 
-      if (rangeCurrentPane === 0 && oldEndDate) {
+      if (rangeIndex === 0 && oldEndDate) {
         if (dayjs(oldEndDate).isBefore(dayjs(newStartDate))) {
           dateRange[1] = new Date(newStartDate);
         }
@@ -572,23 +562,18 @@ export default {
       let rangeStart = newStartDate ? new Date(newStartDate) : null;
       let rangeEnd = dateRange[1] ? new Date(dateRange[1]) : null;
 
-      this.$emit('change', [rangeStart, rangeEnd]);
-      if (rangeCurrentPane === 0) {
-        this.$emit('startChange', rangeStart);
-      } else if (rangeCurrentPane === 1) {
-        this.$emit('endChange', rangeEnd);
-      }
+      this.$emit('change', [rangeStart, rangeEnd], this.rangeName);
 
       setTimeout(() => {
-        if (rangeCurrentPane === 0) {
-          if (!this.endFakeDisabled) {
+        if (rangeIndex === 0) {
+          if (!this.endDisabled) {
             this.$refs['endInput'].focus();
           } else {
             this.close();
           }
         }
 
-        if (rangeCurrentPane === 1) {
+        if (rangeIndex === 1) {
           this.close();
         }
       }, 50);
@@ -644,38 +629,47 @@ export default {
         clearTimeout(this.endBlurTimer);
       }, 1);
     },
-    focus() {
-      let $input = this.$refs['input'];
-      $input.focus();
+    focus(rangeName) {
+      if (!this.isRange) {
+        this.focusImplement(this.$refs['input']);
+        return;
+      }
+
+      if (rangeName === 'start') {
+        this.focusImplement(this.$refs['startInput']);
+      } else if (rangeName === 'end') {
+        this.focusImplement(this.$refs['endInput']);
+      }
     },
-    focusStart() {
-      let $input = this.$refs['startInput'];
-      $input.focus();
+    focusImplement($target) {
+      $target.focus();
     },
-    focusEnd() {
-      let $input = this.$refs['endInput'];
-      $input.focus();
+    blur(rangeName) {
+      if (!this.isRange) {
+        this.blurImplement(this.$refs['input']);
+        return;
+      }
+
+      if (rangeName === 'start') {
+        this.blurImplement(this.$refs['startInput']);
+      } else if (rangeName === 'end') {
+        this.blurImplement(this.$refs['endInput']);
+      }
     },
-    blur() {
-      let $input = this.$refs['input'];
-      $input.blur();
+    blurImplement($target) {
+      $target.blur();
     },
-    blurStart() {
-      let $input = this.$refs['startInput'];
-      $input.blur();
-    },
-    blurEnd() {
-      let $input = this.$refs['endInput'];
-      $input.blur();
-    },
-    open() {
-      this.openImplement();
-    },
-    openStart() {
-      this.openStartImplement();
-    },
-    openEnd() {
-      this.openEndImplement();
+    open(rangeName) {
+      if (!this.isRange) {
+        this.openImplement();
+        return;
+      }
+
+      if (rangeName === 'start') {
+        this.openStartImplement();
+      } else if (rangeName === 'end') {
+        this.openEndImplement();
+      }
     }
   }
 };
@@ -692,96 +686,53 @@ export default {
   font-size: 14px;
   line-height: 20px;
   font-family: @font-family;
+  color: @font-color;
+}
+
+.@{date-picket}-toggle {
+  box-sizing: border-box;
+  width: 200px;
+}
+
+.@{date-picket}-inner {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  height: 30px;
 
   &.is-disabled {
     opacity: 0.5;
   }
 }
 
-.@{date-picket}-toggle {
-  box-sizing: border-box;
-  width: 200px;
-  height: 30px;
-}
-
-.@{date-picket}-inner {
-  display: block;
-  box-sizing: border-box;
-  height: 100%;
-
-  ::placeholder {
-    color: @placeholder-color;
-  }
-
-  &.@{date-picket}-inner-fake-disabled {
-    .@{date-picket}-input {
-      background-color: #eeeeee;
-      color: @placeholder-color;
-    }
-
-    .@{date-picket}-suffix {
-      display: none;
-    }
-  }
-}
-
 .@{date-picket}-input {
-  line-height: 18px;
+  font-size: 14px;
+  line-height: 20px;
   box-sizing: border-box;
-  border: 1px solid #ccc;
+  border: none;
   width: 100%;
   height: 100%;
-  padding: 5px;
+  padding: 4px 28px 4px 10px;
   outline: none;
   cursor: default;
+  color: @font-color;
 
   &[disabled] {
     background-color: #eeeeee;
   }
 }
 
-.@{date-picket}-overlay {
-  color: #999;
-  margin-right: 30px;
-  display: block;
-  margin-top: -30px;
-  position: relative;
-  pointer-events: none;
-}
-
-.@{date-picket}-prefix,
-.@{date-picket}-suffix {
-  padding: 5px;
-  vertical-align: top;
-  display: inline-block;
-}
-
-.@{date-picket}-prefix {
-  float: left;
-}
-
-.@{date-picket}-suffix {
-  float: right;
-}
-
 .@{date-picket}-icon {
   float: right;
-  margin-top: -30px;
-  position: relative;
-  width: 30px;
-  height: 30px;
-  vertical-align: top;
-  display: inline-block;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  margin: 6px;
   pointer-events: none;
-
-  &:before {
-    content: '';
-    display: block;
-    width: 24px;
-    height: 24px;
-    margin: 3px;
-    background-image: url(../../assets/icons/icon-calendar.svg);
-  }
+  background-image: url(../../assets/icons/icon-calendar.svg);
 }
 
 .@{date-picket}-months {

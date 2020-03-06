@@ -552,6 +552,7 @@ export default {
   font-size: 14px;
   line-height: 20px;
   font-family: @font-family;
+  color: @font-color;
 
   &.is-disabled {
     opacity: 0.5;
@@ -564,19 +565,14 @@ export default {
   height: 30px;
 }
 
-.@{autocomplete}-inner {
-  ::placeholder {
-    color: @placeholder-color;
-  }
-}
-
 .@{autocomplete}-input {
-  line-height: 18px;
+  font-size: 14px;
+  line-height: 20px;
   height: 30px;
   box-sizing: border-box;
   border: 1px solid #ccc;
   width: 100%;
-  padding: 5px;
+  padding: 4px 10px;
   outline: none;
 
   &[disabled] {

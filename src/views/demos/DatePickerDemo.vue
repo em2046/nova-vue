@@ -11,6 +11,7 @@
           :disabledDate="disabledDateBefore"
           popover-class="test"
           @focus="handleInputFocus"
+          @blur="handleInputBlur"
           placeholder="请选择日期"
           ref="my-date-picker"
         ></NovaDatePicker>
@@ -63,17 +64,12 @@
           type="range"
           :show-suffix="true"
           @focus="handleRangeFocus"
-          @startFocus="handleStartFocus"
-          @endFocus="handleEndFocus"
-          @startClick="handleStartClick"
-          @endClick="handleEndClick"
-          start-placeholder="请选择开始日期"
-          end-placeholder="请选择结束日期"
+          @blur="handleRangeBlur"
+          @click="handleRangeClick"
           ref="my-range-date-picker"
         ></NovaDatePicker>
       </NovaLocale>
       <NovaDatePicker
-        class="has-prefix"
         v-model="emptyDateRange"
         type="range"
         :disabled="true"
@@ -93,16 +89,14 @@
       <NovaDatePicker
         v-model="emptyDateRange"
         type="range"
-        :start-fake-disabled="true"
-        start-placeholder="YYYY-MM-DD"
+        :placeholder="['YYYY-MM-DD', null]"
         :custom-tooltip="customTooltip"
         show-suffix
       ></NovaDatePicker>
       <NovaDatePicker
         v-model="emptyDateRange"
         type="range"
-        :end-fake-disabled="true"
-        end-placeholder=""
+        :placeholder="[null, 'EMPTY']"
         :show-tooltip="false"
         show-suffix
       ></NovaDatePicker>
@@ -113,10 +107,32 @@
         @open="handleOpen"
         @close="handleClose"
         @change="handleRangeChange"
-        @startChange="handleStartChange"
-        @endChange="handleEndChange"
         :disabled-date="disabledRange"
         :locale="customChinese"
+      ></NovaDatePicker>
+      <NovaDatePicker
+        v-model="someDateRange"
+        :show-suffix="true"
+        type="range"
+        @open="handleOpen"
+        @close="handleClose"
+        @change="handleRangeChange"
+        :disabled="[false, true]"
+        :disabled-date="disabledRange"
+        :locale="customChinese"
+        :placeholder="['START', 'END']"
+      ></NovaDatePicker>
+      <NovaDatePicker
+        v-model="someDateRange"
+        :show-suffix="true"
+        type="range"
+        @open="handleOpen"
+        @close="handleClose"
+        @change="handleRangeChange"
+        :disabled="[true, false]"
+        :disabled-date="disabledRange"
+        :locale="customChinese"
+        :placeholder="['请选择开始日期', '请选择结束日期']"
       ></NovaDatePicker>
     </div>
     <div class="box">
@@ -146,7 +162,7 @@ export default {
       .startOf('day')
       .toDate();
     let anotherDate = dayjs()
-      .add(1, 'month')
+      .add(15, 'day')
       .toDate();
 
     return {
@@ -182,44 +198,36 @@ export default {
     handleInputFocus(e) {
       console.log('Input Focus', e);
     },
-    handleRangeFocus(e) {
-      console.log('Range Focus', e);
+    handleInputBlur(e) {
+      console.log('Input Blur', e);
     },
-    handleStartFocus(e) {
-      console.log('Start Focus', e);
+    handleRangeFocus(e, rangeName) {
+      console.log('Range Focus', e, rangeName);
     },
-    handleEndFocus(e) {
-      console.log('End Focus', e);
+    handleRangeBlur(e, rangeName) {
+      console.log('Range Blur', e, rangeName);
     },
-    handleStartClick(e) {
-      console.log('Start Click', e);
+    handleRangeClick(e) {
+      console.log('Range click', e);
     },
-    handleEndClick(e) {
-      console.log('End Click', e);
+    handleOpen(rangeName) {
+      console.log('DatePicker Dropdown OPEN', rangeName);
     },
-    handleOpen() {
-      console.log('DatePicker Dropdown OPEN');
-    },
-    handleClose() {
-      console.log('DatePicker Dropdown CLOSE');
+    handleClose(rangeName) {
+      console.log('DatePicker Dropdown CLOSE', rangeName);
     },
     handleChange(value) {
       console.log(value);
     },
-    handleRangeChange(range) {
-      console.log(range[0], range[1]);
-      let start = dayjs(range[0]);
-      let end = dayjs(range[1]);
+    handleRangeChange(dates, rangeName) {
+      console.log(dates, rangeName);
+
+      let start = dayjs(dates[0]);
+      let end = dayjs(dates[1]);
       if (start.isSame(end, 'day')) {
-        end.add(1, 'days');
+        end.add(1, 'day');
       }
       this.someDateRange[1] = end.toDate();
-    },
-    handleStartChange(value) {
-      console.log('start', value);
-    },
-    handleEndChange(value) {
-      console.log('end', value);
     },
     disabledDateBefore(current) {
       // Can not select days before today and today
@@ -235,25 +243,30 @@ export default {
         .toDate();
       return current > today;
     },
-    disabledRange(current, index) {
+    disabledRange(current, rangeName) {
       // Start
-      if (index === 0) {
+      if (rangeName === 'start') {
         let today = dayjs()
           .startOf('day')
           .toDate();
         return current < today;
       }
       // End
-      if (index === 1) {
+      if (rangeName === 'end') {
         let start = this.someDateRange[0];
-        return current <= start;
+        return (
+          current <= start ||
+          dayjs(start)
+            .add(30, 'day')
+            .isBefore(current)
+        );
       }
     },
     customTooltip(date) {
       // console.log(date);
       let today = dayjs().startOf('day');
       let dateMoment = dayjs(date);
-      return dateMoment.diff(today, 'days');
+      return dateMoment.diff(today, 'day');
     },
     disabledMonthPrev(date) {
       let thisMonth = dayjs().startOf('month');
@@ -308,7 +321,7 @@ export default {
       let $myDatePicker = this.$refs['my-range-date-picker'];
 
       setTimeout(() => {
-        $myDatePicker.focusStart();
+        $myDatePicker.focus('start');
       }, 1);
     },
     triggerBlurStart() {
@@ -319,14 +332,14 @@ export default {
       }, 1);
 
       setTimeout(() => {
-        $myDatePicker.blurStart();
+        $myDatePicker.blur('start');
       }, 1000);
     },
     triggerFocusEnd() {
       let $myDatePicker = this.$refs['my-range-date-picker'];
 
       setTimeout(() => {
-        $myDatePicker.focusEnd();
+        $myDatePicker.focus('end');
       }, 1);
     },
     triggerBlurEnd() {
@@ -337,30 +350,30 @@ export default {
       }, 1);
 
       setTimeout(() => {
-        $myDatePicker.blurEnd();
+        $myDatePicker.blur('end');
       }, 1000);
     },
     triggerOpenStart() {
       let $myDatePicker = this.$refs['my-range-date-picker'];
       setTimeout(() => {
-        $myDatePicker.openStart();
+        $myDatePicker.open('start');
       }, 1);
     },
     triggerOpenEnd() {
       let $myDatePicker = this.$refs['my-range-date-picker'];
 
       setTimeout(() => {
-        $myDatePicker.openEnd();
+        $myDatePicker.open('end');
       }, 1);
     },
     triggerRangeClose() {
       let $myDatePicker = this.$refs['my-range-date-picker'];
 
       setTimeout(() => {
-        $myDatePicker.openStart();
+        $myDatePicker.open('start');
       }, 1);
       setTimeout(() => {
-        $myDatePicker.openEnd();
+        $myDatePicker.open('end');
       }, 500);
 
       setTimeout(() => {
@@ -368,10 +381,10 @@ export default {
       }, 1000);
 
       setTimeout(() => {
-        $myDatePicker.openEnd();
+        $myDatePicker.open('end');
       }, 1500);
       setTimeout(() => {
-        $myDatePicker.openStart();
+        $myDatePicker.open('start');
       }, 2000);
 
       setTimeout(() => {
@@ -383,18 +396,14 @@ export default {
 </script>
 
 <style lang="less" scoped>
-/deep/ .nova-date-picker {
+.nova-date-picker {
   margin-right: 20px;
   margin-bottom: 20px;
 
-  .nova-date-picker-toggle {
+  /deep/ .nova-date-picker-toggle {
     .nova-date-picker-inner {
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
   }
-}
-
-.has-prefix /deep/ .nova-date-picker-input {
-  padding-left: 40px;
 }
 </style>

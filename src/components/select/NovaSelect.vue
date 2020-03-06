@@ -265,6 +265,7 @@ export default {
   font-size: 14px;
   line-height: 20px;
   font-family: @font-family;
+  color: @font-color;
 
   &:focus {
     outline: none;
@@ -333,7 +334,7 @@ export default {
 }
 
 .@{select}-labels {
-  padding: 2px;
+  padding: 2px 4px;
 }
 
 .@{select}-label {
@@ -345,7 +346,7 @@ export default {
   vertical-align: top;
   margin: 2px;
   line-height: 18px;
-  padding: 0 18px 0 4px;
+  padding: 0 18px 0 3px;
   border: 1px solid #ccc;
   .ellipsis();
 }

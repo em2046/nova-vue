@@ -51,7 +51,7 @@ export default {
       return this.offset;
     },
     setPosition(select) {
-      let selectHeight = select.clientHeight;
+      let selectHeight = select.offsetHeight;
 
       let offset = Utils.getElementOffset(select);
 
@@ -75,6 +75,7 @@ export default {
   line-height: 20px;
   position: absolute;
   background-color: #fff;
+  color: @font-color;
   border: 1px solid #cccccc;
   font-family: @font-family;
   box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);
@@ -84,15 +85,5 @@ export default {
   width: 200px;
   max-height: 302px;
   overflow: auto;
-}
-
-.@{prefixed}-autocomplete-dropdown {
-  margin-top: 1px;
-}
-
-.@{prefixed}-date-picker-dropdown {
-  position: absolute;
-  background-color: #fff;
-  border: 1px solid #cccccc;
 }
 </style>

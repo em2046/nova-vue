@@ -2,7 +2,7 @@
   <div
     class="nova-date-picker-month"
     :data-month-offset="offset"
-    :data-range-active="rangeCurrentPane"
+    :data-range-index="rangeIndex"
   >
     <div class="nova-date-picker-header">
       <div
@@ -25,7 +25,7 @@
         class="nova-date-picker-next"
         :class="getMonthNextClass()"
         @click="nextMonthClick"
-        :title="!isDisabledMonthNext() ? novaLocale.datePicker.prevMonth : ''"
+        :title="!isDisabledMonthNext() ? novaLocale.datePicker.nextMonth : ''"
       >
         {{ novaLocale.datePicker.nextMonth }}
       </div>
@@ -46,7 +46,7 @@
           class="nova-date-picker-date"
           :class="getMomentClassName(dateMoment)"
           v-for="dateMoment in momentList"
-          :key="dateMoment.format('YYYY-MM-DD')"
+          :key="dateMoment.format(defaultFormat)"
           @click="handleMomentSelect(dateMoment)"
           @mouseenter="handleDateMouseEnter(dateMoment, $event)"
           @mouseleave="handleDateMouseLeave"
@@ -62,6 +62,7 @@
 
 <script>
 import dayjs from 'dayjs';
+import Calendar from '@/utils/calendar';
 
 export default {
   name: 'Month',
@@ -84,12 +85,16 @@ export default {
       momentList: [],
       showMonthSize: NovaDatePicker.showMonthSize,
       weeks: NovaDatePicker.weeks,
-      isRange: NovaDatePicker.isRange
+      isRange: NovaDatePicker.isRange,
+      defaultFormat: Calendar.defaultFormat
     };
   },
   computed: {
-    rangeCurrentPane() {
-      return this.NovaDatePicker.rangeCurrentPane;
+    rangeIndex() {
+      return this.NovaDatePicker.rangeIndex;
+    },
+    rangeName() {
+      return this.NovaDatePicker.rangeName;
     }
   },
   mounted() {
@@ -114,7 +119,7 @@ export default {
         return;
       }
 
-      if (!(this.isRange && this.rangeCurrentPane === 1)) {
+      if (!(this.isRange && this.rangeIndex === 1)) {
         return;
       }
 
@@ -159,7 +164,7 @@ export default {
         if (this.isRange) {
           let selectedMoment = this.NovaDatePicker.valueMoment;
 
-          if (this.rangeCurrentPane === 1) {
+          if (this.rangeIndex === 1) {
             let startDate = selectedMoment[0];
             let endDate = selectedMoment[1];
 
@@ -233,7 +238,7 @@ export default {
 
         isRangeStart = this.isSameDateMoment(startMoment, dateMoment);
         isRangeEnd = this.isSameDateMoment(endMoment, dateMoment);
-        let isEndPane = this.rangeCurrentPane === 1;
+        let isEndPane = this.rangeIndex === 1;
 
         if (startMoment && !endMoment) {
           isRangeStartSingle = true;
@@ -306,7 +311,7 @@ export default {
 
       if (
         this.isRange &&
-        this.rangeCurrentPane === 1 &&
+        this.rangeIndex === 1 &&
         this.NovaDatePicker.valueMoment
       ) {
         let startMoment = this.NovaDatePicker.valueMoment[0];
@@ -318,7 +323,7 @@ export default {
       let userDisabled = this.NovaDatePicker.disabledDate.call(
         undefined,
         dateMoment.toDate(),
-        this.rangeCurrentPane
+        this.rangeName
       );
       return userDisabled || rangeDisabled;
     },
@@ -396,7 +401,7 @@ export default {
     border-right: none;
   }
 
-  &[data-range-active='1'] {
+  &[data-range-index='1'] {
     .@{date-picket}-date {
       &:before {
         position: absolute;
