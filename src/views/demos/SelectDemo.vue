@@ -16,7 +16,7 @@
           :value="option.value"
         ></NovaOption>
       </NovaSelect>
-      <NovaLocale :locale="en">
+      <NovaLocale :locale="en" :block="false">
         <NovaSelect
           v-model="selectValue1"
           @change="handleChange"
@@ -64,7 +64,7 @@
           :value="option.value"
         ></NovaOption>
       </NovaSelect>
-      <NovaLocale :locale="en">
+      <NovaLocale :locale="en" :block="false">
         <NovaSelect
           v-model="selectValue2"
           @change="handleChange"
@@ -222,7 +222,7 @@ export default {
         }
       ],
       selectValue1: '',
-      selectValue2: [],
+      selectValue2: ['orange', 'apple'],
       selectValue3: '',
       selectValue4: '',
       selectValue5: [],

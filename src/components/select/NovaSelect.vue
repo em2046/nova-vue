@@ -9,47 +9,49 @@
   >
     <div class="nova-select-toggle" @click="handleToggleClick">
       <span class="nova-select-arrow"></span>
-      <template v-if="multiple === false">
-        <span
-          class="nova-select-text nova-select-placeholder"
-          v-if="!hasValue()"
-        >
-          {{ getPlaceholder() }}
-        </span>
-        <span class="nova-select-text" v-if="hasValue()">
-          {{ displayedLabel() || value }}
-        </span>
-      </template>
-      <template v-if="multiple === true && value">
-        <span
-          class="nova-select-text nova-select-placeholder"
-          v-if="!value.length"
-        >
-          {{ getPlaceholder() }}
-        </span>
-        <div class="nova-select-labels">
-          <transition-group
-            name="nova-zoom"
-            @after-leave="handleTransitionFinished"
-            @enter="handleTransitionFinished"
+      <ClientOnly>
+        <template v-if="multiple === false">
+          <span
+            class="nova-select-text nova-select-placeholder"
+            v-if="!hasValue()"
           >
-            <span class="nova-select-label" v-for="v in value" :key="v">
-              <span>{{ valueToLabel(v) || v }}</span>
-              <span
-                class="nova-select-label-delete"
-                :class="{ 'is-disabled': disabled }"
-                @click="handleDeleteClick(v)"
-              ></span>
-            </span>
-          </transition-group>
-        </div>
-      </template>
+            {{ getPlaceholder() }}
+          </span>
+          <span class="nova-select-text" v-if="hasValue()">
+            {{ displayedLabel() || value }}
+          </span>
+        </template>
+        <template v-if="multiple === true && value">
+          <span
+            class="nova-select-text nova-select-placeholder"
+            v-if="!value.length"
+          >
+            {{ getPlaceholder() }}
+          </span>
+          <div class="nova-select-labels">
+            <transition-group
+              name="nova-zoom"
+              @after-leave="handleTransitionFinished"
+              @enter="handleTransitionFinished"
+            >
+              <span class="nova-select-label" v-for="v in value" :key="v">
+                <span>{{ valueToLabel(v) || v }}</span>
+                <span
+                  class="nova-select-label-delete"
+                  :class="{ 'is-disabled': disabled }"
+                  @click="handleDeleteClick(v)"
+                ></span>
+              </span>
+            </transition-group>
+          </div>
+        </template>
+      </ClientOnly>
     </div>
 
     <NovaDropdown
       ref="dropdown"
       :opened="opened"
-      :append-to-body="appendToBody"
+      :append-to-body="appendToBody && dropdownLoaded"
       :popover-class="['nova-select-dropdown', popoverClass]"
     >
       <slot></slot>
@@ -98,6 +100,7 @@ export default {
   },
   data() {
     return {
+      dropdownLoaded: false,
       opened: false,
       currentChild: null,
       multipleOptions: []
@@ -189,6 +192,14 @@ export default {
       this.closeDropdown();
     },
     handleToggleClick(e) {
+      if (!this.dropdownLoaded) {
+        this.dropdownLoaded = true;
+        this.$nextTick(() => {
+          this.handleToggleClick(e);
+        });
+        return;
+      }
+
       if (this.disabled) {
         return;
       }
@@ -265,6 +276,7 @@ export default {
   font-size: 14px;
   line-height: 20px;
   font-family: @font-family;
+  background-color: @component-background;
   color: @font-color;
 
   &:focus {
