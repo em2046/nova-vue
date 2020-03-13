@@ -3,30 +3,30 @@
     <div class="box">
       <NovaSelect
         v-model="selectValue1"
-        @change="handleChange"
-        @open="handleOpen"
-        @close="handleClose"
-        @click="handleClick"
         popover-class="test"
+        @change="handleChange"
+        @click="handleClick"
+        @close="handleClose"
+        @open="handleOpen"
       >
         <NovaOption
-          :key="option.value"
           v-for="option in selectOptions"
+          :key="option.value"
           :label="option.label"
           :value="option.value"
         ></NovaOption>
       </NovaSelect>
-      <NovaLocale :locale="en" :block="false">
+      <NovaLocale :block="false" :locale="en">
         <NovaSelect
           v-model="selectValue1"
-          @change="handleChange"
-          @open="handleOpen"
-          @close="handleClose"
           :append-to-body="false"
+          @change="handleChange"
+          @close="handleClose"
+          @open="handleOpen"
         >
           <NovaOption
-            :key="option.value"
             v-for="option in selectOptions"
+            :key="option.value"
             :label="option.label"
             :value="option.value"
           ></NovaOption>
@@ -34,15 +34,15 @@
       </NovaLocale>
       <NovaSelect
         v-model="selectValue1"
-        @change="handleChange"
-        @open="handleOpen"
-        @close="handleClose"
         :append-to-body="true"
         :disabled="true"
+        @change="handleChange"
+        @close="handleClose"
+        @open="handleOpen"
       >
         <NovaOption
-          :key="option.value"
           v-for="option in selectOptions"
+          :key="option.value"
           :label="option.label"
           :value="option.value"
         ></NovaOption>
@@ -52,30 +52,30 @@
     <div class="box">
       <NovaSelect
         v-model="selectValue2"
-        @change="handleChange"
-        @open="handleOpen"
-        @close="handleClose"
         :multiple="true"
+        @change="handleChange"
+        @close="handleClose"
+        @open="handleOpen"
       >
         <NovaOption
-          :key="option.value"
           v-for="option in selectOptions"
+          :key="option.value"
           :label="option.label"
           :value="option.value"
         ></NovaOption>
       </NovaSelect>
-      <NovaLocale :locale="en" :block="false">
+      <NovaLocale :block="false" :locale="en">
         <NovaSelect
           v-model="selectValue2"
-          @change="handleChange"
-          @open="handleOpen"
-          @close="handleClose"
-          :multiple="true"
           :append-to-body="false"
+          :multiple="true"
+          @change="handleChange"
+          @close="handleClose"
+          @open="handleOpen"
         >
           <NovaOption
-            :key="option.value"
             v-for="option in selectOptions"
+            :key="option.value"
             :label="option.label"
             :value="option.value"
           ></NovaOption>
@@ -83,15 +83,15 @@
       </NovaLocale>
       <NovaSelect
         v-model="selectValue2"
-        @change="handleChange"
-        @open="handleOpen"
-        @close="handleClose"
-        :multiple="true"
         :disabled="true"
+        :multiple="true"
+        @change="handleChange"
+        @close="handleClose"
+        @open="handleOpen"
       >
         <NovaOption
-          :key="option.value"
           v-for="option in selectOptions"
+          :key="option.value"
           :label="option.label"
           :value="option.value"
         ></NovaOption>
@@ -102,48 +102,48 @@
       <NovaSelect v-model="selectValue3">
         <NovaOptGroup label="直辖市">
           <NovaOption
-            :value="m"
             v-for="(m, mIndex) in administrativeDivision.municipality"
             :key="mIndex"
+            :value="m"
           ></NovaOption>
         </NovaOptGroup>
         <NovaOptGroup label="自治区">
           <NovaOption
-            :value="a"
             v-for="(a, aIndex) in administrativeDivision.autonomousRegion"
             :key="aIndex"
+            :value="a"
           ></NovaOption>
         </NovaOptGroup>
         <NovaOption
-          :value="p"
           v-for="(p, pIndex) in administrativeDivision.province"
           :key="pIndex"
+          :value="p"
         ></NovaOption>
       </NovaSelect>
       <NovaSelect
-        placeholder="元素表示一个控件，提供一个选项菜单"
         v-model="selectValue4"
+        placeholder="元素表示一个控件，提供一个选项菜单"
       >
         <NovaOptGroup label="元素表示一个控件，提供一个选项菜单">
           <NovaOption
-            value="apple"
             label="元素表示一个控件，提供一个选项菜单"
+            value="apple"
           ></NovaOption>
         </NovaOptGroup>
       </NovaSelect>
       <NovaSelect
-        placeholder="元素表示一个控件，提供一个选项菜单"
         v-model="selectValue5"
         multiple
+        placeholder="元素表示一个控件，提供一个选项菜单"
       >
         <NovaOptGroup label="元素表示一个控件，提供一个选项菜单">
           <NovaOption
-            value="apple"
             label="元素表示一个控件，提供一个选项菜单"
+            value="apple"
           ></NovaOption>
           <NovaOption
-            value="banana"
             label="元素表示一个控件，提供一个选项菜单"
+            value="banana"
           ></NovaOption>
         </NovaOptGroup>
       </NovaSelect>
@@ -152,17 +152,17 @@
     <div class="box">
       <NovaSelect v-model="emojiSelect">
         <NovaOptGroup>
-          <template slot="label">
+          <template v-slot:label>
             <div class="large-icon">❤</div>
           </template>
           <template>
-            <NovaOption value="apple" label="苹果">
+            <NovaOption label="苹果" value="apple">
               <div class="large-icon">🍎</div>
             </NovaOption>
-            <NovaOption value="orange" label="橘子">
+            <NovaOption label="橘子" value="orange">
               <div class="large-icon">🍊</div>
             </NovaOption>
-            <NovaOption value="banana" label="香蕉">
+            <NovaOption label="香蕉" value="banana">
               <div class="large-icon">🍌</div>
             </NovaOption>
           </template>
@@ -174,8 +174,8 @@
       <NovaSelect v-model="numberOfSelect">
         <NovaOption
           v-for="(item, itemIndex) in 10"
-          :value="itemIndex"
           :key="itemIndex"
+          :value="itemIndex"
         >
           {{ itemIndex }}
         </NovaOption>
@@ -199,6 +199,7 @@ import NovaOptGroup from '@/components/select/NovaOptGroup';
 
 export default {
   name: 'SelectDemo',
+  components: { NovaOptGroup, NovaLocale, NovaOption, NovaSelect },
   data() {
     return {
       en: en,
@@ -265,7 +266,6 @@ export default {
       boolValue: false
     };
   },
-  components: { NovaOptGroup, NovaLocale, NovaOption, NovaSelect },
   methods: {
     handleClick(e) {
       console.log(e);

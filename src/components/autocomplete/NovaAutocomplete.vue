@@ -1,45 +1,45 @@
 <template>
   <div
-    class="nova-autocomplete"
+    ref="autocomplete"
     :class="autocompleteClass"
+    class="nova-autocomplete"
     v-bind="$attrs"
     v-on="$listeners"
-    ref="autocomplete"
   >
     <div class="nova-autocomplete-toggle">
       <div class="nova-autocomplete-inner">
         <input
-          autocomplete="off"
           ref="input"
+          :disabled="disabled"
+          :placeholder="placeholder"
+          :value.prop="valueModel"
+          autocomplete="off"
           class="nova-autocomplete-input"
           type="text"
-          :value.prop="valueModel"
-          :placeholder="placeholder"
-          :disabled="disabled"
-          @input="handleInput"
-          @focus="handleFocus"
           @blur="handleBlur"
+          @focus="handleFocus"
+          @input="handleInput"
           @keydown="handleKeydown"
         />
         <span
-          class="nova-autocomplete-overlay nova-autocomplete-prefix"
           v-if="showPrefix"
+          class="nova-autocomplete-overlay nova-autocomplete-prefix"
         >
           <slot name="prefix"></slot>
         </span>
         <span
-          class="nova-autocomplete-overlay nova-autocomplete-suffix"
           v-if="showSuffix"
+          class="nova-autocomplete-overlay nova-autocomplete-suffix"
         >
           <slot name="suffix"></slot>
         </span>
       </div>
     </div>
     <NovaDropdown
-      ref="start-dropdown"
       v-if="start.dropdownLoaded"
-      :opened="start.opened"
+      ref="start-dropdown"
       :append-to-body="appendToBody"
+      :opened="start.opened"
       :popover-class="['nova-autocomplete-dropdown', popoverClass]"
     >
       <div class="nova-autocomplete-start">
@@ -47,36 +47,36 @@
       </div>
     </NovaDropdown>
     <NovaDropdown
-      ref="list-dropdown"
       v-if="list.dropdownLoaded"
-      :opened="list.opened"
+      ref="list-dropdown"
       :append-to-body="appendToBody"
+      :opened="list.opened"
       :popover-class="['nova-autocomplete-dropdown', popoverClass]"
     >
       <div
-        class="nova-autocomplete-groups"
-        ref="groups"
         v-if="list.groups.length"
+        ref="groups"
+        class="nova-autocomplete-groups"
       >
         <div
-          class="nova-autocomplete-group"
           v-for="(group, groupIndex) in list.groups"
           :key="groupIndex"
+          class="nova-autocomplete-group"
         >
           <div class="nova-autocomplete-label">
-            <slot name="group-label" :group="group"></slot>
+            <slot :group="group" name="group-label"></slot>
           </div>
-          <div class="nova-autocomplete-list" v-if="group.children.length">
+          <div v-if="group.children.length" class="nova-autocomplete-list">
             <div
-              class="nova-autocomplete-item"
+              v-for="item in group.children"
+              :key="item.index"
+              ref="items"
               :class="{
                 'is-selected': item.index === list.activeIndex,
                 'is-disabled': item.disabled
               }"
-              v-for="item in group.children"
-              :key="item.index"
+              class="nova-autocomplete-item"
               @click="handleItemClick(item)"
-              ref="items"
             >
               <slot :item="item">
                 {{ item.value }}
@@ -103,8 +103,8 @@
 import debounce from 'lodash/debounce';
 import Utils from '@/utils/utils';
 import locale from '@/mixin/locale';
-import NovaDropdown from '@/components/dropdown/NovaDropdown';
-import NovaAlert from '@/components/alert/NovaAlert';
+import NovaDropdown from '@/components/dropdown/NovaDropdown.jsx';
+import NovaAlert from '@/components/alert/NovaAlert.jsx';
 
 const POSITION = {
   BOTTOM: 'BOTTOM',
@@ -119,7 +119,10 @@ export default {
     event: 'update'
   },
   props: {
-    value: {},
+    value: {
+      type: String,
+      default: null
+    },
     placeholder: {
       type: String,
       default: ''
@@ -161,6 +164,25 @@ export default {
       default: false
     }
   },
+  data() {
+    let searchDebounce = debounce(this.searchImplement, this.debounce);
+    return {
+      searchDebounce: searchDebounce,
+      queryString: '',
+      start: {
+        dropdownLoaded: false,
+        opened: false
+      },
+      list: {
+        dropdownLoaded: false,
+        opened: false,
+        data: [],
+        groups: [],
+        activeIndex: -1
+      },
+      autoSelectTimer: null
+    };
+  },
   computed: {
     valueModel: {
       get() {
@@ -196,25 +218,6 @@ export default {
       }
       return null;
     }
-  },
-  data() {
-    let searchDebounce = debounce(this.searchImplement, this.debounce);
-    return {
-      searchDebounce: searchDebounce,
-      queryString: '',
-      start: {
-        dropdownLoaded: false,
-        opened: false
-      },
-      list: {
-        dropdownLoaded: false,
-        opened: false,
-        data: [],
-        groups: [],
-        activeIndex: -1
-      },
-      autoSelectTimer: null
-    };
   },
   destroyed() {
     this.closeStartDropdown();
@@ -560,102 +563,3 @@ export default {
   }
 };
 </script>
-
-<style lang="less">
-@import '../../styles/var';
-
-@autocomplete: @{prefixed}-autocomplete;
-
-.@{autocomplete} {
-  vertical-align: top;
-  display: inline-block;
-  font-size: 14px;
-  line-height: 20px;
-  font-family: @font-family;
-  color: @font-color;
-
-  &.is-disabled {
-    opacity: 0.5;
-  }
-}
-
-.@{autocomplete}-toggle {
-  box-sizing: border-box;
-  width: 200px;
-  height: 30px;
-}
-
-.@{autocomplete}-input {
-  font-size: 14px;
-  line-height: 20px;
-  height: 30px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  width: 100%;
-  padding: 4px 10px;
-  outline: none;
-
-  &[disabled] {
-    background-color: #eeeeee;
-  }
-}
-
-.@{autocomplete}-overlay {
-  color: #999;
-  display: block;
-  margin-top: -30px;
-  position: relative;
-  pointer-events: none;
-}
-
-.@{autocomplete}-prefix,
-.@{autocomplete}-suffix {
-  padding: 5px;
-  vertical-align: top;
-  display: inline-block;
-}
-
-.@{autocomplete}-prefix {
-  float: left;
-}
-
-.@{autocomplete}-suffix {
-  float: right;
-}
-
-.@{autocomplete}-item {
-  cursor: pointer;
-  padding: 5px 10px;
-
-  &:hover:not(.is-disabled) {
-    color: #ee3388;
-    background-color: #fef2f9;
-  }
-
-  &.is-selected {
-    background-color: #fef2f9;
-  }
-
-  &.is-disabled {
-    opacity: 0.5;
-    cursor: default;
-  }
-}
-
-.@{autocomplete}-empty {
-  .nova-alert {
-    padding-left: 30px;
-    padding-right: 10px;
-  }
-}
-
-.@{autocomplete}-start {
-  width: 198px;
-}
-
-.@{autocomplete}-groups {
-  width: 198px;
-  max-height: 300px;
-  overflow: auto;
-}
-</style>

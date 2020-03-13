@@ -3,23 +3,26 @@
     <div class="calendar-box">
       <div class="calendar-title">日历</div>
       <NovaCalendar
-        :month-size="2"
         v-model="calendarDate"
-        :disabledDate="disabledDateBefore"
-        :disabledMonthPrev="disabledMonthPrev"
-        :disabledMonthNext="disabledMonthNext"
+        :disabled-date="disabledDateBefore"
+        :disabled-month-next="disabledMonthNext"
+        :disabled-month-prev="disabledMonthPrev"
+        :month-size="2"
         @panelChange="handlePanelChange"
       >
-        <template slot="dateCellRender" slot-scope="scope">
-          <div class="date-cell" @mouseenter="handleCellEnter($event, scope)">
+        <template v-slot:dateCellRender="slotProps">
+          <div
+            class="date-cell"
+            @mouseenter="handleCellEnter($event, slotProps)"
+          >
             <div class="calendar-num">
-              {{ getDayOfMonth(scope.date) }}
+              {{ getDayOfMonth(slotProps.date) }}
             </div>
             <div class="calendar-labels">
               <div
+                v-if="getHoliday(slotProps.date)"
+                :title="getHoliday(slotProps.date).title"
                 class="calendar-label calendar-rest"
-                v-if="getHoliday(scope.date)"
-                :title="getHoliday(scope.date).title"
               >
                 休
               </div>
@@ -29,7 +32,7 @@
       </NovaCalendar>
 
       <div class="calendar-footer">
-        <a href="" class="calendar-more">
+        <a class="calendar-more" href="">
           <template>{{ dayjs(calendarDate).format('YYYY-MM') }}</template>
           <template>{{ '更多' }}</template>
         </a>
@@ -92,8 +95,8 @@ export default {
     handlePanelChange(date) {
       console.log(dayjs(date).format('YYYY-MM-DD'));
     },
-    handleCellEnter(e, scope) {
-      console.log(scope);
+    handleCellEnter(e, slotProps) {
+      console.log(slotProps);
     }
   }
 };
@@ -147,7 +150,6 @@ export default {
   top: 10px;
   left: 10px;
   line-height: 12px;
-  width: 100px;
   height: 12px;
 }
 

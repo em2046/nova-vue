@@ -50,8 +50,8 @@
           @change="handleOrientationsChange"
         >
           <NovaCheckbox
-            value="EAST"
             v-model="isChecked"
+            value="EAST"
             @change="handleOrientationChange"
             >东
           </NovaCheckbox>
@@ -72,7 +72,7 @@
       <dd>
         <NovaCheckboxGroup v-model="orientations">
           <NovaCheckbox value="EAST">东</NovaCheckbox>
-          <NovaCheckbox value="SOUTH" disabled>南</NovaCheckbox>
+          <NovaCheckbox disabled value="SOUTH">南</NovaCheckbox>
           <NovaCheckbox value="WEST">西</NovaCheckbox>
           <NovaCheckbox value="NORTH">北</NovaCheckbox>
         </NovaCheckboxGroup>
@@ -81,9 +81,9 @@
     <dl>
       <dt>朝向：</dt>
       <dd>
-        <NovaCheckboxGroup disabled v-model="orientations">
+        <NovaCheckboxGroup v-model="orientations" disabled>
           <NovaCheckbox value="EAST">东</NovaCheckbox>
-          <NovaCheckbox value="SOUTH" disabled>南</NovaCheckbox>
+          <NovaCheckbox disabled value="SOUTH">南</NovaCheckbox>
           <NovaCheckbox value="WEST">西</NovaCheckbox>
           <NovaCheckbox value="NORTH">北</NovaCheckbox>
         </NovaCheckboxGroup>

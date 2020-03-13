@@ -2,25 +2,25 @@
   <div>
     <div class="box">
       <NovaAutocomplete
+        ref="my-autocomplete"
         v-model="city"
         :fetch-suggestions="querySearch"
-        @select="handleSelect"
-        popover-class="my-autocomplete-dropdown"
+        auto-select
+        class="my-autocomplete"
         placeholder="请选择城市"
+        popover-class="my-autocomplete-dropdown"
         show-prefix
         show-suffix
-        ref="my-autocomplete"
-        class="my-autocomplete"
-        auto-select
         @click="handleClick"
+        @select="handleSelect"
       >
-        <template slot="prefix">
+        <template v-slot:prefix>
           出发地：
         </template>
-        <template slot="suffix">
+        <template v-slot:suffix>
           🚝
         </template>
-        <template slot="start">
+        <template v-slot:start>
           <div class="city-area">
             <div class="city-hot">
               <div class="city-hot-title">
@@ -28,24 +28,24 @@
               </div>
               <div class="city-list">
                 <div
+                  v-for="(cityHot, cityHotIndex) in cityAreaHot.children"
+                  :key="'CITY_' + cityHotIndex"
+                  :class="{ hidden: !cityHot.title }"
                   class="city-item"
-                  :class="{ hidden: !city.title }"
-                  v-for="(city, cityIndex) in cityAreaHot.children"
-                  :key="'CITY_' + cityIndex"
-                  @click="handleCitySelect(city)"
+                  @click="handleCitySelect(cityHot)"
                 >
-                  <template v-if="city.title">{{ city.title }}</template>
+                  <template v-if="cityHot.title">{{ cityHot.title }}</template>
                 </div>
               </div>
             </div>
             <div class="city-tabs">
               <div
-                class="city-tab"
+                v-for="(list, listIndex) in cityAreaList"
+                :key="'TAB' + listIndex"
                 :class="{
                   active: cityStartActiveIndex === listIndex
                 }"
-                v-for="(list, listIndex) in cityAreaList"
-                :key="'TAB' + listIndex"
+                class="city-tab"
                 @click="handleCityIndexSwitch(listIndex)"
               >
                 <div class="city-tab-text">{{ list.name }}</div>
@@ -53,36 +53,38 @@
             </div>
 
             <div
-              class="city-pane"
+              v-for="(list, listIndex) in cityAreaList"
+              :key="'PANE' + listIndex"
               :class="{
                 active: cityStartActiveIndex === listIndex
               }"
-              v-for="(list, listIndex) in cityAreaList"
-              :key="'PANE' + listIndex"
+              class="city-panel"
             >
               <div
-                class="city-line"
-                :class="{ hidden: !list.children }"
                 v-for="(sub, subIndex) in list.children"
                 :key="'LETTER_' + subIndex"
+                :class="{ hidden: !list.children }"
+                class="city-line"
               >
-                <div class="city-sub-title" v-if="sub.name">{{ sub.name }}</div>
+                <div v-if="sub.name" class="city-sub-title">{{ sub.name }}</div>
                 <div v-if="sub.children" class="city-list">
                   <div
+                    v-for="(cityItem, cityItemIndex) in sub.children"
+                    :key="'CITY_' + cityItemIndex"
                     class="city-item"
-                    v-for="(city, cityIndex) in sub.children"
-                    :key="'CITY_' + cityIndex"
-                    @click="handleCitySelect(city)"
+                    @click="handleCitySelect(cityItem)"
                   >
-                    <template v-if="city.title">{{ city.title }}</template>
+                    <template v-if="cityItem.title">
+                      {{ cityItem.title }}
+                    </template>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </template>
-        <template slot-scope="scope">
-          {{ scope.item.name }}
+        <template v-slot:default="slotProps">
+          {{ slotProps.item.name }}
         </template>
       </NovaAutocomplete>
     </div>
@@ -115,7 +117,7 @@ export default {
       cityStartActiveIndex: 0
     };
   },
-  mounted() {
+  created() {
     this.loadAll();
   },
   methods: {
@@ -290,7 +292,7 @@ export default {
   }
 }
 
-.city-pane {
+.city-panel {
   display: none;
 
   &.active {

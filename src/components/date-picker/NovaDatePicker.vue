@@ -1,102 +1,102 @@
 <template>
   <div
-    class="nova-date-picker"
+    ref="date-picker"
     :class="datePickerClass"
+    class="nova-date-picker"
     v-bind="$attrs"
     v-on="$listeners"
-    ref="date-picker"
   >
-    <div class="nova-date-picker-toggle" v-if="!isRange">
+    <div v-if="!isRange" class="nova-date-picker-toggle">
       <div
-        class="nova-date-picker-inner"
-        :class="{ 'is-disabled': isDisabled }"
         ref="inner"
+        :class="{ 'is-disabled': isDisabled }"
+        class="nova-date-picker-inner"
       >
         <input
-          autocomplete="off"
-          class="nova-date-picker-input"
-          type="text"
-          :value="displayedDate"
-          readonly
+          ref="input"
           :disabled="disabled"
           :placeholder="datePlaceholder"
-          @focus="handleInputFocus"
+          :value="displayedDate"
+          autocomplete="off"
+          class="nova-date-picker-input"
+          readonly
+          type="text"
           @blur="handleInputBlur"
           @click="handleInputClick"
-          ref="input"
+          @focus="handleInputFocus"
         />
-        <span class="nova-date-picker-icon" v-if="showIcon"></span>
+        <span v-if="showIcon" class="nova-date-picker-icon"></span>
       </div>
     </div>
-    <div class="nova-date-picker-toggle" v-if="isRange">
+    <div v-if="isRange" class="nova-date-picker-toggle">
       <div
-        class="nova-date-picker-inner nova-date-picker-range-start"
+        ref="start"
         :class="{
           'is-disabled': startDisabled
         }"
-        ref="start"
+        class="nova-date-picker-inner nova-date-picker-range-start"
       >
         <input
-          autocomplete="off"
-          class="nova-date-picker-input"
-          type="text"
-          :value="displayedRange.start"
-          readonly
+          ref="startInput"
           :disabled="startDisabled"
           :placeholder="startPlaceholder"
-          @focus="handleStartFocus"
+          :value="displayedRange.start"
+          autocomplete="off"
+          class="nova-date-picker-input"
+          readonly
+          type="text"
           @blur="handleStartBlur"
-          ref="startInput"
+          @focus="handleStartFocus"
         />
-        <span class="nova-date-picker-icon" v-if="showIcon"></span>
+        <span v-if="showIcon" class="nova-date-picker-icon"></span>
       </div>
       <div
-        class="nova-date-picker-inner nova-date-picker-range-end"
+        ref="end"
         :class="{
           'is-disabled': endDisabled
         }"
-        ref="end"
+        class="nova-date-picker-inner nova-date-picker-range-end"
       >
         <input
-          autocomplete="off"
-          class="nova-date-picker-input"
-          type="text"
-          :value="displayedRange.end"
-          readonly
+          ref="endInput"
           :disabled="endDisabled"
           :placeholder="endPlaceholder"
-          @focus="handleEndFocus"
+          :value="displayedRange.end"
+          autocomplete="off"
+          class="nova-date-picker-input"
+          readonly
+          type="text"
           @blur="handleEndBlur"
-          ref="endInput"
+          @focus="handleEndFocus"
         />
-        <span class="nova-date-picker-icon" v-if="showIcon"></span>
+        <span v-if="showIcon" class="nova-date-picker-icon"></span>
       </div>
     </div>
     <NovaDropdown
       v-if="dropdownLoaded"
       ref="dropdown"
-      :opened="opened"
       :append-to-body="appendToBody"
+      :opened="opened"
       :popover-class="['nova-date-picker-dropdown', popoverClass]"
     >
       <div
-        class="nova-date-picker-months"
         ref="months"
+        class="nova-date-picker-months"
         @mousedown="handleDropdownMousedown"
       >
         <Month
-          ref="monthRef"
           v-for="(month, monthIndex) in showMonthSize"
-          :offset="monthIndex"
           :key="monthIndex"
-          :nova-locale="novaLocale"
+          ref="monthRef"
           :nova-holiday="novaHoliday"
+          :nova-locale="novaLocale"
+          :offset="monthIndex"
         ></Month>
       </div>
       <div
-        class="nova-date-picker-tooltip"
         v-show="tooltip.visible && showTooltip"
         :style="tooltipStyle()"
+        class="nova-date-picker-tooltip"
       >
         {{ tooltip.text }}
       </div>
@@ -109,8 +109,8 @@ import dayjs from 'dayjs';
 import Utils from '@/utils/utils';
 import Calendar from '@/utils/calendar';
 import locale from '@/mixin/locale';
-import NovaDropdown from '@/components/dropdown/NovaDropdown';
-import Month from './Month';
+import NovaDropdown from '@/components/dropdown/NovaDropdown.jsx';
+import Month from './Month.vue';
 
 export default {
   name: 'NovaDatePicker',
@@ -128,7 +128,10 @@ export default {
     event: 'update'
   },
   props: {
-    value: {},
+    value: {
+      type: [Date, Array],
+      default: null
+    },
     placeholder: {
       type: [String, Array],
       default: undefined
@@ -150,7 +153,8 @@ export default {
       default: 'date'
     },
     monthSize: {
-      type: Number
+      type: Number,
+      default: null
     },
     showIcon: {
       type: Boolean,
@@ -194,7 +198,7 @@ export default {
       startBlurTimer: null,
       endBlurTimer: null,
       weeks: Calendar.weeks,
-      paneMoment: first,
+      panelMoment: first,
       dropdownLoaded: false,
       opened: false,
       rangeIndex: 0,
@@ -334,7 +338,7 @@ export default {
       return placeholder;
     }
   },
-  mounted() {
+  created() {
     this.init();
   },
   destroyed() {
@@ -609,7 +613,7 @@ export default {
         return;
       }
       if (dayjs(date).isValid()) {
-        this.paneMoment = Calendar.getFirstDateMomentOfMonth(date);
+        this.panelMoment = Calendar.getFirstDateMomentOfMonth(date);
       }
 
       this.refreshDateList();
@@ -700,108 +704,3 @@ export default {
   }
 };
 </script>
-
-<style lang="less">
-@import '../../styles/var';
-
-@date-picket: @{prefixed}-date-picker;
-
-.@{date-picket} {
-  vertical-align: top;
-  display: inline-block;
-  font-size: 14px;
-  line-height: 20px;
-  font-family: @font-family;
-  color: @font-color;
-}
-
-.@{date-picket}-toggle {
-  box-sizing: border-box;
-  width: 200px;
-}
-
-.@{date-picket}-inner {
-  position: relative;
-  display: block;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  height: 30px;
-
-  &.is-disabled {
-    opacity: 0.5;
-  }
-}
-
-.@{date-picket}-input {
-  font-size: 14px;
-  line-height: 20px;
-  box-sizing: border-box;
-  border: none;
-  width: 100%;
-  height: 100%;
-  padding: 4px 28px 4px 10px;
-  outline: none;
-  cursor: default;
-  color: @font-color;
-
-  &[disabled] {
-    background-color: #eeeeee;
-  }
-}
-
-.@{date-picket}-icon {
-  float: right;
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 16px;
-  height: 16px;
-  margin: 6px;
-  pointer-events: none;
-  background-image: url(../../assets/icons/icon-calendar.svg);
-}
-
-.@{date-picket}-months {
-  white-space: nowrap;
-}
-
-.@{date-picket}-tooltip {
-  position: absolute;
-  color: #666666;
-  border: 1px solid #cccccc;
-  padding: 5px 10px;
-  pointer-events: none;
-  background-color: #fff;
-  line-height: 20px;
-  text-align: center;
-  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);
-  white-space: nowrap;
-  margin-top: 10px;
-  margin-left: 15px;
-  transform: translate(-50%, 0);
-
-  &:before,
-  &:after {
-    width: 0;
-    height: 0;
-    border-style: solid;
-    content: '';
-    display: block;
-    position: absolute;
-    left: 50%;
-    transform: translate(-50%, 0);
-  }
-
-  &:before {
-    top: -7px;
-    border-width: 0 7px 7px 7px;
-    border-color: transparent transparent #cccccc transparent;
-  }
-
-  &:after {
-    top: -5.5px;
-    border-width: 0 6px 6px 6px;
-    border-color: transparent transparent #ffffff transparent;
-  }
-}
-</style>

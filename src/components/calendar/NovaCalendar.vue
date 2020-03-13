@@ -2,19 +2,19 @@
   <div class="nova-calendar" v-bind="$attrs" v-on="$listeners">
     <div class="nova-calendar-months">
       <Month
+        v-for="(month, monthIndex) in showMonthSize"
+        :key="monthIndex"
         ref="monthRef"
         :nova-locale="novaLocale"
-        v-for="(month, monthIndex) in showMonthSize"
         :offset="monthIndex"
-        :key="monthIndex"
       >
-        <template slot="dateCellRender" slot-scope="scope">
+        <template v-slot:dateCellRender="slotProps">
           <slot
+            :date="slotProps.date"
+            :index="slotProps.index"
+            :offset="slotProps.offset"
+            :panelDate="slotProps.panelDate"
             name="dateCellRender"
-            :date="scope.date"
-            :index="scope.index"
-            :offset="scope.offset"
-            :paneDate="scope.paneDate"
           ></slot>
         </template>
       </Month>
@@ -26,16 +26,16 @@
 import dayjs from 'dayjs';
 import Calendar from '@/utils/calendar';
 import locale from '@/mixin/locale';
-import Month from './Month';
+import Month from './Month.vue';
 
 export default {
   name: 'NovaCalendar',
+  components: {
+    Month
+  },
   mixins: [locale],
   model: {
     event: 'update'
-  },
-  components: {
-    Month
   },
   provide() {
     return {
@@ -43,7 +43,10 @@ export default {
     };
   },
   props: {
-    value: {},
+    value: {
+      type: Date,
+      default: null
+    },
     disabledDate: {
       type: Function,
       default: () => {
@@ -76,7 +79,7 @@ export default {
     this.$emit('update', first.toDate());
     return {
       weeks: Calendar.weeks,
-      paneMoment: first,
+      panelMoment: first,
       defaultFormat: Calendar.defaultFormat
     };
   },
@@ -91,12 +94,12 @@ export default {
         return;
       }
       if (dayjs(date).isValid()) {
-        this.paneMoment = Calendar.getFirstDateMomentOfMonth(date);
+        this.panelMoment = Calendar.getFirstDateMomentOfMonth(date);
       }
 
       this.refreshDateList();
-      this.$emit('update', this.paneMoment.toDate());
-      this.$emit('panelChange', this.paneMoment.toDate());
+      this.$emit('update', this.panelMoment.toDate());
+      this.$emit('panelChange', this.panelMoment.toDate());
     },
     refreshDateList() {
       let monthRef = this.$refs['monthRef'];
@@ -110,15 +113,3 @@ export default {
   }
 };
 </script>
-
-<style lang="less">
-@import '../../styles/var';
-
-@calendar: @{prefixed}-calendar;
-
-.@{calendar} {
-  font-family: @font-family;
-  font-size: 12px;
-  color: @font-color;
-}
-</style>

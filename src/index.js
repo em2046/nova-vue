@@ -4,8 +4,6 @@ import ClientOnly from 'vue-client-only';
 
 import { version } from '../package.json';
 
-import './styles/common.less';
-
 import en from './locales/lang/en';
 import zhCN from './locales/lang/zh-CN';
 import zhTW from './locales/lang/zh-TW';
@@ -14,19 +12,19 @@ import china from './locales/holiday/china';
 Vue.use(PortalVue);
 Vue.component('ClientOnly', ClientOnly);
 
-export NovaLocale from './components/locale/NovaLocale';
-export NovaSelect from './components/select/NovaSelect';
-export NovaOptGroup from './components/select/NovaOptGroup';
-export NovaOption from './components/select/NovaOption';
-export NovaDropdown from './components/dropdown/NovaDropdown';
-export NovaDatePicker from './components/date-picker/NovaDatePicker';
-export NovaCalendar from './components/calendar/NovaCalendar';
-export NovaAlert from './components/alert/NovaAlert';
-export NovaAutocomplete from './components/autocomplete/NovaAutocomplete';
-export NovaRadio from './components/radio/NovaRadio';
-export NovaRadioGroup from './components/radio/NovaRadioGroup';
-export NovaCheckbox from './components/checkbox/NovaCheckbox';
-export NovaCheckboxGroup from './components/checkbox/NovaCheckboxGroup';
+export NovaAlert from './components/alert/NovaAlert.jsx';
+export NovaAutocomplete from './components/autocomplete/NovaAutocomplete.vue';
+export NovaCalendar from './components/calendar/NovaCalendar.vue';
+export NovaCheckbox from './components/checkbox/NovaCheckbox.jsx';
+export NovaCheckboxGroup from './components/checkbox/NovaCheckboxGroup.jsx';
+export NovaDatePicker from './components/date-picker/NovaDatePicker.vue';
+export NovaDropdown from './components/dropdown/NovaDropdown.jsx';
+export NovaLocale from './components/locale/NovaLocale.jsx';
+export NovaOptGroup from './components/select/NovaOptGroup.jsx';
+export NovaOption from './components/select/NovaOption.jsx';
+export NovaRadio from './components/radio/NovaRadio.jsx';
+export NovaRadioGroup from './components/radio/NovaRadioGroup.jsx';
+export NovaSelect from './components/select/NovaSelect.jsx';
 
 export default {
   version,

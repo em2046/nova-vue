@@ -3,10 +3,10 @@
     <div class="nova-calendar-header">
       <div class="nova-calendar-weeks">
         <div
-          class="nova-calendar-week"
-          :class="'nova-calendar-' + weeks[titleIndex]"
           v-for="(title, titleIndex) in weeks"
           :key="titleIndex"
+          :class="'nova-calendar-' + weeks[titleIndex]"
+          class="nova-calendar-week"
         >
           {{ novaLocale.datePicker.weeksShort[title] }}
         </div>
@@ -15,17 +15,17 @@
     <div class="nova-calendar-content">
       <div class="nova-calendar-dates">
         <div
-          class="nova-calendar-date"
-          :class="getMomentClassName(dateMoment)"
           v-for="(dateMoment, dateMomentIndex) in momentList"
           :key="dateMoment.format(defaultFormat)"
+          :class="getMomentClassName(dateMoment)"
+          class="nova-calendar-date"
         >
           <slot
-            name="dateCellRender"
             :date="dateMoment.toDate()"
             :index="dateMomentIndex"
             :offset="offset"
-            :paneDate="getShowMoment().toDate()"
+            :panelDate="getShowMoment().toDate()"
+            name="dateCellRender"
           >
             <div class="nova-calendar-date-number">
               {{ dateMoment.date() }}
@@ -36,26 +36,23 @@
     </div>
     <div class="nova-calendar-sidebar">
       <div
-        class="nova-calendar-prev"
         :class="getMonthPrevClass()"
-        @click="prevMonthClick"
         :title="!isDisabledMonthPrev() ? novaLocale.datePicker.prevMonth : ''"
+        class="nova-calendar-prev"
+        @click="prevMonthClick"
       >
         {{ novaLocale.datePicker.prevMonth }}
       </div>
       <div class="nova-calendar-title">
         <span class="nova-calendar-title-support"></span>
-        <span
-          class="nova-calendar-title-text"
-          v-html="getCalendarTitle()"
-        ></span>
+        <span class="nova-calendar-title-text">{{ getCalendarTitle() }}</span>
       </div>
 
       <div
-        class="nova-calendar-next"
         :class="getMonthNextClass()"
-        @click="nextMonthClick"
         :title="!isDisabledMonthNext() ? novaLocale.datePicker.nextMonth : ''"
+        class="nova-calendar-next"
+        @click="nextMonthClick"
       >
         {{ novaLocale.datePicker.nextMonth }}
       </div>
@@ -73,7 +70,8 @@ export default {
       default: 0
     },
     novaLocale: {
-      type: Object
+      type: Object,
+      default: null
     }
   },
   data() {
@@ -85,7 +83,7 @@ export default {
       momentList: []
     };
   },
-  mounted() {
+  created() {
     this.init();
   },
   methods: {
@@ -95,32 +93,31 @@ export default {
     refreshDateList() {
       let firstMomentOfMonth = this.getShowMoment();
       let dayOfWeek = firstMomentOfMonth.day();
-      let firstMomentOfPane = firstMomentOfMonth.subtract(dayOfWeek, 'days');
+      let firstMomentOfPanel = firstMomentOfMonth.subtract(dayOfWeek, 'days');
 
       let momentList = new Array(7 * 6).fill(null);
       this.momentList = momentList.map((d, index) => {
-        return firstMomentOfPane.add(index, 'days');
+        return firstMomentOfPanel.add(index, 'days');
       });
     },
     getCalendarTitle() {
       let showMoment = this.getShowMoment();
       return this.novaLocale.datePicker
         .yearAndMonth(showMoment.year(), showMoment.month())
-        .toString()
-        .replace(' ', '<br>');
+        .replace(' ', '\n');
     },
     getShowMoment() {
-      return this.NovaCalendar.paneMoment.add(this.offset, 'month');
+      return this.NovaCalendar.panelMoment.add(this.offset, 'month');
     },
     getMomentClassName(dateMoment) {
-      let paneMoment = this.getShowMoment();
+      let panelMoment = this.getShowMoment();
       let isDisabled = this.isDisabled(dateMoment);
 
       let isPrev = false;
       let isNext = false;
       if (dateMoment) {
-        isPrev = paneMoment.isAfter(dateMoment, 'month');
-        isNext = paneMoment.isBefore(dateMoment, 'month');
+        isPrev = panelMoment.isAfter(dateMoment, 'month');
+        isNext = panelMoment.isBefore(dateMoment, 'month');
       }
 
       return {
@@ -140,16 +137,16 @@ export default {
         return;
       }
 
-      let paneMoment = this.NovaCalendar.paneMoment.add(-1, 'month');
-      this.NovaCalendar.updateShowDate(paneMoment.toDate());
+      let panelMoment = this.NovaCalendar.panelMoment.add(-1, 'month');
+      this.NovaCalendar.updateShowDate(panelMoment.toDate());
     },
     nextMonthClick() {
       if (this.isDisabledMonthNext()) {
         return;
       }
 
-      let paneMoment = this.NovaCalendar.paneMoment.add(1, 'month');
-      this.NovaCalendar.updateShowDate(paneMoment.toDate());
+      let panelMoment = this.NovaCalendar.panelMoment.add(1, 'month');
+      this.NovaCalendar.updateShowDate(panelMoment.toDate());
     },
     isDisabledMonthPrev() {
       return this.NovaCalendar.disabledMonthPrev.call(
@@ -182,216 +179,3 @@ export default {
   }
 };
 </script>
-
-<style lang="less">
-@import '../../styles/var';
-
-@calendar: @{prefixed}-calendar;
-
-.@{calendar}-month {
-  position: relative;
-  border: 1px solid #eee;
-}
-
-.@{calendar}-month + .@{calendar}-month {
-  margin-top: -1px;
-}
-
-.@{calendar}-month {
-  &:before {
-    content: '';
-    display: block;
-    position: absolute;
-    height: 1px;
-    border-top: 1px solid #f90;
-    margin-left: -1px;
-    margin-top: -1px;
-  }
-
-  &:first-child {
-    &:before {
-      display: none;
-    }
-  }
-}
-
-.@{calendar}-sidebar {
-  width: 75px;
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  top: 0;
-  padding-top: 41px;
-}
-
-.@{calendar}-prev,
-.@{calendar}-next {
-  font-size: 0;
-  visibility: hidden;
-  width: 75px;
-  height: 95px;
-  position: relative;
-
-  &:before {
-    content: '';
-    display: block;
-    position: absolute;
-    width: 32px;
-    height: 18px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-image: url(../../assets/icons/calendar-next.svg);
-  }
-
-  &:hover:not(.is-disabled) {
-    cursor: pointer;
-    background-color: #f5f5f5;
-  }
-}
-
-.@{calendar}-prev {
-  &:before {
-    background-image: url(../../assets/icons/calendar-prev.svg);
-  }
-
-  &:hover {
-    &:before {
-      background-image: url(../../assets/icons/calendar-prev-hover.svg);
-    }
-  }
-
-  &.is-disabled {
-    &:before {
-      background-image: url(../../assets/icons/calendar-prev-disabled.svg);
-    }
-  }
-}
-
-.@{calendar}-next {
-  bottom: 0;
-
-  &:before {
-    background-image: url(../../assets/icons/calendar-next.svg);
-  }
-
-  &:hover {
-    &:before {
-      background-image: url(../../assets/icons/calendar-next-hover.svg);
-    }
-  }
-
-  &.is-disabled {
-    &:before {
-      background-image: url(../../assets/icons/calendar-next-disabled.svg);
-    }
-  }
-}
-
-.@{calendar}-month:first-child {
-  .@{calendar}-prev {
-    visibility: visible;
-  }
-}
-
-.@{calendar}-month:last-child {
-  .@{calendar}-next {
-    visibility: visible;
-  }
-}
-
-.@{calendar}-title {
-  hyphens: auto;
-  word-break: break-all;
-  text-align: center;
-  font-size: 16px;
-  width: 75px;
-  height: calc(100% - 95px * 2);
-  color: #666;
-  padding: 5px 5px 5px 5px;
-  box-sizing: border-box;
-  user-select: none;
-}
-
-.@{calendar}-title-support {
-  display: inline-block;
-  width: 0;
-  font-size: 0;
-  height: 100%;
-  vertical-align: middle;
-}
-
-.@{calendar}-title-text {
-  display: inline-block;
-  vertical-align: middle;
-  width: 100%;
-}
-
-.@{calendar}-header {
-  border-bottom: 1px solid #eee;
-  padding-right: 75px;
-}
-
-.@{calendar}-weeks {
-  height: 40px;
-}
-
-.@{calendar}-week {
-  color: #666;
-  box-sizing: border-box;
-  width: calc(100% / 7);
-  display: inline-block;
-  vertical-align: top;
-  height: 40px;
-  font-size: 16px;
-  text-align: center;
-  line-height: 20px;
-  padding: 10px;
-
-  &.@{calendar}-sun,
-  &.@{calendar}-sat {
-    color: #f60;
-  }
-}
-
-.@{calendar}-content {
-  position: relative;
-  padding-right: 75px;
-}
-
-.@{calendar}-dates {
-  user-select: none;
-  padding: 1px 0 0 1px;
-  margin: -1px;
-}
-
-.@{calendar}-date {
-  position: relative;
-  display: inline-block;
-  vertical-align: top;
-  width: calc((100% - 1px) / 7 + 1px);
-  height: 96px;
-  border: 1px solid #eee;
-  box-sizing: border-box;
-  margin-left: -1px;
-  margin-top: -1px;
-
-  &.is-prev,
-  &.is-next {
-    color: #bababa;
-  }
-
-  &.is-disabled {
-    color: #bababa;
-  }
-}
-
-.@{calendar}-date-number {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 100px;
-  height: 12px;
-  line-height: 12px;
-}
-</style>

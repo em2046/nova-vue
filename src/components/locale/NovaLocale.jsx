@@ -1,15 +1,3 @@
-<template>
-  <div
-    class="nova-locale"
-    :class="{ 'nova-locale-block': block }"
-    v-bind="$attrs"
-    v-on="$listeners"
-  >
-    <slot></slot>
-  </div>
-</template>
-
-<script>
 import zhCN from '@/locales/lang/zh-CN';
 import holiday from '@/locales/holiday/china';
 
@@ -37,17 +25,24 @@ export default {
         return zhCN;
       }
     }
+  },
+  render() {
+    const { block, $attrs, $slots, $listeners } = this;
+
+    const classList = { 'nova-locale': true, 'nova-locale-block': block };
+
+    const children = $slots.default;
+
+    const localeProps = {
+      class: classList,
+      attrs: {
+        ...$attrs
+      },
+      on: {
+        ...$listeners
+      }
+    };
+
+    return <div {...localeProps}>{children}</div>;
   }
 };
-</script>
-
-<style lang="less">
-@import '../../styles/var';
-
-.@{prefixed}-locale {
-  &:not(.@{prefixed}-locale-block) {
-    vertical-align: top;
-    display: inline-block;
-  }
-}
-</style>

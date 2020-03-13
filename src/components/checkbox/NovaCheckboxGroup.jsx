@@ -1,15 +1,5 @@
-<template>
-  <div
-    ref="checkbox-group"
-    class="nova-checkbox-group"
-    v-bind="$attrs"
-    v-on="$listeners"
-  >
-    <slot />
-  </div>
-</template>
+import Storage from '@/utils/storage';
 
-<script>
 export default {
   name: 'NovaCheckboxGroup',
   provide() {
@@ -21,7 +11,14 @@ export default {
     event: 'update'
   },
   props: {
-    value: {},
+    prefixedClass: {
+      type: String,
+      default: `${Storage.prefix}-checkbox`
+    },
+    value: {
+      type: Array,
+      default: () => []
+    },
     disabled: {
       type: Boolean,
       default: false
@@ -30,7 +27,7 @@ export default {
   methods: {
     setChecked(checkedValue, checked, trigger) {
       let newValue;
-      let found = this.value.find(item => {
+      const found = this.value.find(item => {
         return item === checkedValue;
       });
 
@@ -54,21 +51,23 @@ export default {
         this.$emit('change', newValue);
       }
     }
+  },
+  render() {
+    const { $attrs, $listeners, $slots, prefixedClass } = this;
+
+    const groupProps = {
+      class: `${prefixedClass}-group`,
+      attrs: {
+        ...$attrs
+      },
+      on: {
+        ...$listeners
+      },
+      ref: 'checkbox-group'
+    };
+
+    const children = $slots.default;
+
+    return <div {...groupProps}>{children}</div>;
   }
 };
-</script>
-
-<style lang="less">
-@import '../../styles/var';
-
-@checkbox: @{prefixed}-checkbox;
-
-.@{checkbox}-group {
-  display: inline-block;
-  line-height: 20px;
-
-  .@{checkbox} {
-    margin-right: 10px;
-  }
-}
-</style>
