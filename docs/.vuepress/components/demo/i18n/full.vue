@@ -1,18 +1,24 @@
 <template>
   <section>
-    <NovaLocale :holiday="china" :locale="zhCN">
-      <NovaDatePicker placeholder="选择日期" v-model="date"></NovaDatePicker>
-    </NovaLocale>
     <NovaLocale :holiday="hideHoliday" :locale="en">
-      <NovaDatePicker placeholder="Select date" v-model="date"></NovaDatePicker>
+      <NovaDatePicker
+        v-model="date"
+        format="ddd MMM DD YYYY"
+        placeholder="Select date"
+      ></NovaDatePicker>
+    </NovaLocale>
+    <NovaLocale :holiday="holidayZhCN" :locale="zhCN">
+      <NovaDatePicker
+        v-model="date"
+        format="YYYY年 M月 D日"
+        placeholder="选择日期"
+      ></NovaDatePicker>
     </NovaLocale>
   </section>
 </template>
 
 <script>
-const en = nova.locale.en;
-const zhCN = nova.locale.zhCN;
-const china = nova.holiday.china;
+import { en, zhCN, holidayZhCN } from 'nova-vue'
 
 export default {
   data() {
@@ -20,7 +26,7 @@ export default {
       date: null,
       en,
       zhCN,
-      china,
+      holidayZhCN,
       hideHoliday: {}
     };
   }

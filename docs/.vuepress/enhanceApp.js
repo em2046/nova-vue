@@ -1,6 +1,6 @@
-import nova, {
+import {
   NovaAlert,
-  NovaAutocomplete,
+  NovaAutoComplete,
   NovaCalendar,
   NovaCheckbox,
   NovaCheckboxGroup,
@@ -12,18 +12,12 @@ import nova, {
   NovaRadio,
   NovaRadioGroup,
   NovaSelect
-} from '../..';
+} from 'nova-vue';
 import '../../dist/nova.css';
 
 export default ({ Vue }) => {
-  if (typeof window !== 'undefined') {
-    window.nova = nova;
-  } else if (typeof global !== 'undefined') {
-    global.nova = nova;
-  }
-
   Vue.component('NovaAlert', NovaAlert);
-  Vue.component('NovaAutocomplete', NovaAutocomplete);
+  Vue.component('NovaAutoComplete', NovaAutoComplete);
   Vue.component('NovaCalendar', NovaCalendar);
   Vue.component('NovaCheckbox', NovaCheckbox);
   Vue.component('NovaCheckboxGroup', NovaCheckboxGroup);

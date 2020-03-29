@@ -1,0 +1,104 @@
+@import '../../../styles/var';
+
+@auto-complete: ~'@{prefix}-auto-complete';
+
+.@{auto-complete} {
+  vertical-align: top;
+  display: inline-block;
+  font-size: 14px;
+  line-height: 20px;
+  font-family: @font-family;
+  color: @font-color;
+
+  &.is-disabled {
+    opacity: 0.5;
+  }
+
+  &:hover,
+  &.is-open {
+    .@{auto-complete}-toggle {
+      border: 1px solid @primary-color;
+    }
+  }
+
+  &.is-open {
+    .@{auto-complete}-toggle {
+      box-shadow: @focus-shadow-primary;
+    }
+  }
+}
+
+.@{auto-complete}-toggle {
+  box-sizing: border-box;
+  width: 200px;
+  height: 30px;
+  border: 1px solid @border-color;
+}
+
+.@{auto-complete}-input {
+  font-size: 14px;
+  line-height: 20px;
+  height: 28px;
+  box-sizing: border-box;
+  border: none;
+  width: 100%;
+  padding: 4px 10px;
+  outline: none;
+
+  &[disabled] {
+    background-color: #eeeeee;
+  }
+}
+
+.@{auto-complete}-label {
+  opacity: 0.5;
+  padding: 5px 10px;
+
+  &:empty {
+    display: none;
+
+    & + .@{auto-complete}-list {
+      .@{auto-complete}-item {
+        padding-left: 10px;
+      }
+    }
+  }
+}
+
+.@{auto-complete}-item {
+  cursor: pointer;
+  padding: 5px 10px 5px 20px;
+
+  &:hover:not(.is-disabled) {
+    color: @primary-color;
+    background-color: #fef2f9;
+  }
+
+  &.is-selected {
+    background-color: #fef2f9;
+  }
+
+  &.is-disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+.@{auto-complete}-empty {
+  .@{prefix}-alert {
+    padding-left: 30px;
+    padding-right: 10px;
+  }
+
+  &:empty {
+    display: none;
+  }
+}
+
+.@{auto-complete}-start {
+}
+
+.@{auto-complete}-groups {
+  max-height: 300px;
+  overflow: auto;
+}

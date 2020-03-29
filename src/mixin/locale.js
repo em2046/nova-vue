@@ -1,6 +1,6 @@
-import zhCN from '@/locales/lang/zh-CN';
-import holiday from '@/locales/holiday/china';
 import Utils from '@/utils/utils';
+import zhCN from '@/locales/zh-CN';
+import holiday from '@/locales/holiday/zh-CN';
 
 export default {
   inject: {
@@ -17,16 +17,16 @@ export default {
     }
   },
   data() {
-    let novaLocale = this.getNovaLocale();
-    let novaHoliday = this.getNovaHoliday();
+    const novaLocale = this.getNovaLocale();
+    const novaHoliday = this.getNovaHoliday();
     return {
-      novaLocale: novaLocale,
-      novaHoliday: novaHoliday
+      novaLocale,
+      novaHoliday
     };
   },
   methods: {
     getNovaLocale() {
-      let novaLocale = Utils.mergeOptions({}, zhCN);
+      const novaLocale = Utils.mergeOptions({}, zhCN);
       if (this.NovaLocale) {
         Utils.mergeOptions(novaLocale, this.NovaLocale.locale);
       }
@@ -37,12 +37,12 @@ export default {
       return novaLocale;
     },
     getNovaHoliday() {
-      let novaHoliday = Utils.mergeOptions({}, holiday);
-      if (this.NovaLocale) {
-        return this.NovaLocale.holiday;
-      }
+      const novaHoliday = Utils.mergeOptions({}, holiday);
       if (this.holiday) {
         return this.holiday;
+      }
+      if (this.NovaLocale) {
+        return this.NovaLocale.holiday;
       }
 
       return novaHoliday;

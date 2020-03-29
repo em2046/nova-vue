@@ -1,9 +1,20 @@
 <template>
   <div class="box">
     <div class="box">
+      <Basic></Basic>
+    </div>
+    <Dynamic></Dynamic>
+    <div class="box">
+      <select>
+        <option value="apple">Apple</option>
+        <option value="banana">Banana</option>
+        <option value="cherry">Cherry</option>
+      </select>
+    </div>
+    <div class="box">
       <NovaSelect
         v-model="selectValue1"
-        popover-class="test"
+        dropdown-class="test"
         @change="handleChange"
         @click="handleClick"
         @close="handleClose"
@@ -12,6 +23,7 @@
         <NovaOption
           v-for="option in selectOptions"
           :key="option.value"
+          :disabled="option.disabled"
           :label="option.label"
           :value="option.value"
         ></NovaOption>
@@ -27,6 +39,7 @@
           <NovaOption
             v-for="option in selectOptions"
             :key="option.value"
+            :disabled="option.disabled"
             :label="option.label"
             :value="option.value"
           ></NovaOption>
@@ -43,6 +56,7 @@
         <NovaOption
           v-for="option in selectOptions"
           :key="option.value"
+          :disabled="option.disabled"
           :label="option.label"
           :value="option.value"
         ></NovaOption>
@@ -60,6 +74,7 @@
         <NovaOption
           v-for="option in selectOptions"
           :key="option.value"
+          :disabled="option.disabled"
           :label="option.label"
           :value="option.value"
         ></NovaOption>
@@ -76,6 +91,7 @@
           <NovaOption
             v-for="option in selectOptions"
             :key="option.value"
+            :disabled="option.disabled"
             :label="option.label"
             :value="option.value"
           ></NovaOption>
@@ -92,6 +108,7 @@
         <NovaOption
           v-for="option in selectOptions"
           :key="option.value"
+          :disabled="option.disabled"
           :label="option.label"
           :value="option.value"
         ></NovaOption>
@@ -152,7 +169,7 @@
     <div class="box">
       <NovaSelect v-model="emojiSelect">
         <NovaOptGroup>
-          <template v-slot:label>
+          <template slot="label">
             <div class="large-icon">❤</div>
           </template>
           <template>
@@ -194,15 +211,24 @@
 import NovaSelect from '../../components/select/NovaSelect';
 import NovaOption from '../../components/select/NovaOption';
 import NovaLocale from '@/components/locale/NovaLocale';
-import en from '@/locales/lang/en';
+import en from '@/locales/en';
 import NovaOptGroup from '@/components/select/NovaOptGroup';
+import Dynamic from '@/views/demos/select/Dynamic';
+import Basic from '@/views/demos/select/Basic';
 
 export default {
   name: 'SelectDemo',
-  components: { NovaOptGroup, NovaLocale, NovaOption, NovaSelect },
+  components: {
+    NovaOptGroup,
+    NovaLocale,
+    NovaOption,
+    NovaSelect,
+    Dynamic,
+    Basic
+  },
   data() {
     return {
-      en: en,
+      en,
       emojiSelect: 'apple',
       selectOptions: [
         {
@@ -215,7 +241,8 @@ export default {
         },
         {
           label: '香蕉',
-          value: 'banana'
+          value: 'banana',
+          disabled: true
         },
         {
           label: '桃子',
@@ -285,6 +312,11 @@ export default {
 
 <style lang="less" scoped>
 .nova-select {
+  margin-right: 20px;
+  margin-bottom: 20px;
+}
+
+/deep/ .nova-select {
   margin-right: 20px;
   margin-bottom: 20px;
 }

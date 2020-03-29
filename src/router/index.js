@@ -11,10 +11,10 @@ const routes = [
     component: Home
   },
   {
-    path: '/about',
-    name: 'About',
+    path: '/icon',
+    name: 'Icon',
     component: () =>
-      import(/* webpackChunkName: "about" */ '../views/About.vue')
+      import(/* webpackChunkName: "icon" */ '../views/demos/IconDemo.vue')
   },
   {
     path: '/select',
@@ -53,11 +53,19 @@ const routes = [
       )
   },
   {
-    path: '/autocomplete',
+    path: '/auto-complete',
     name: 'Autocomplete',
     component: () =>
       import(
-        /* webpackChunkName: "autocomplete" */ '../views/demos/AutocompleteDemo.vue'
+        /* webpackChunkName: "auto-complete" */ '../views/demos/AutoCompleteDemo.vue'
+      )
+  },
+  {
+    path: '/progress',
+    name: 'Progress',
+    component: () =>
+      import(
+        /* webpackChunkName: "progress" */ '../views/demos/ProgressDemo.vue'
       )
   },
   {

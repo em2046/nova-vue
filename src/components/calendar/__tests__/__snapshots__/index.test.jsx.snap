@@ -1,256 +1,162 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`NovaCalendar.vue Calendar should support locale 1`] = `
+exports[`NovaCalendar Calendar should support locale 1`] = `
 <div class="nova-calendar">
   <div class="nova-calendar-months">
     <div class="nova-calendar-month">
       <div class="nova-calendar-header">
         <div class="nova-calendar-weeks">
-          <div class="nova-calendar-week nova-calendar-sun">
-            日
-          </div>
-          <div class="nova-calendar-week nova-calendar-mon">
-            一
-          </div>
-          <div class="nova-calendar-week nova-calendar-tue">
-            二
-          </div>
-          <div class="nova-calendar-week nova-calendar-wed">
-            三
-          </div>
-          <div class="nova-calendar-week nova-calendar-thu">
-            四
-          </div>
-          <div class="nova-calendar-week nova-calendar-fri">
-            五
-          </div>
-          <div class="nova-calendar-week nova-calendar-sat">
-            六
-          </div>
+          <div class="nova-calendar-week nova-calendar-sun">日</div>
+          <div class="nova-calendar-week nova-calendar-mon">一</div>
+          <div class="nova-calendar-week nova-calendar-tue">二</div>
+          <div class="nova-calendar-week nova-calendar-wed">三</div>
+          <div class="nova-calendar-week nova-calendar-thu">四</div>
+          <div class="nova-calendar-week nova-calendar-fri">五</div>
+          <div class="nova-calendar-week nova-calendar-sat">六</div>
         </div>
       </div>
       <div class="nova-calendar-content">
         <div class="nova-calendar-dates">
           <div class="nova-calendar-date is-prev">
-            <div class="nova-calendar-date-number">
-              26
-            </div>
+            <div class="nova-calendar-date-number">26</div>
           </div>
           <div class="nova-calendar-date is-prev">
-            <div class="nova-calendar-date-number">
-              27
-            </div>
+            <div class="nova-calendar-date-number">27</div>
           </div>
           <div class="nova-calendar-date is-prev">
-            <div class="nova-calendar-date-number">
-              28
-            </div>
+            <div class="nova-calendar-date-number">28</div>
           </div>
           <div class="nova-calendar-date is-prev">
-            <div class="nova-calendar-date-number">
-              29
-            </div>
+            <div class="nova-calendar-date-number">29</div>
           </div>
           <div class="nova-calendar-date is-prev">
-            <div class="nova-calendar-date-number">
-              30
-            </div>
+            <div class="nova-calendar-date-number">30</div>
           </div>
           <div class="nova-calendar-date is-prev">
-            <div class="nova-calendar-date-number">
-              31
-            </div>
+            <div class="nova-calendar-date-number">31</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              1
-            </div>
+            <div class="nova-calendar-date-number">1</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              2
-            </div>
+            <div class="nova-calendar-date-number">2</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              3
-            </div>
+            <div class="nova-calendar-date-number">3</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              4
-            </div>
+            <div class="nova-calendar-date-number">4</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              5
-            </div>
+            <div class="nova-calendar-date-number">5</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              6
-            </div>
+            <div class="nova-calendar-date-number">6</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              7
-            </div>
+            <div class="nova-calendar-date-number">7</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              8
-            </div>
+            <div class="nova-calendar-date-number">8</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              9
-            </div>
+            <div class="nova-calendar-date-number">9</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              10
-            </div>
+            <div class="nova-calendar-date-number">10</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              11
-            </div>
+            <div class="nova-calendar-date-number">11</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              12
-            </div>
+            <div class="nova-calendar-date-number">12</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              13
-            </div>
+            <div class="nova-calendar-date-number">13</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              14
-            </div>
+            <div class="nova-calendar-date-number">14</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              15
-            </div>
+            <div class="nova-calendar-date-number">15</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              16
-            </div>
+            <div class="nova-calendar-date-number">16</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              17
-            </div>
+            <div class="nova-calendar-date-number">17</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              18
-            </div>
+            <div class="nova-calendar-date-number">18</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              19
-            </div>
+            <div class="nova-calendar-date-number">19</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              20
-            </div>
+            <div class="nova-calendar-date-number">20</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              21
-            </div>
+            <div class="nova-calendar-date-number">21</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              22
-            </div>
+            <div class="nova-calendar-date-number">22</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              23
-            </div>
+            <div class="nova-calendar-date-number">23</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              24
-            </div>
+            <div class="nova-calendar-date-number">24</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              25
-            </div>
+            <div class="nova-calendar-date-number">25</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              26
-            </div>
+            <div class="nova-calendar-date-number">26</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              27
-            </div>
+            <div class="nova-calendar-date-number">27</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              28
-            </div>
+            <div class="nova-calendar-date-number">28</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              29
-            </div>
+            <div class="nova-calendar-date-number">29</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              30
-            </div>
+            <div class="nova-calendar-date-number">30</div>
           </div>
           <div class="nova-calendar-date">
-            <div class="nova-calendar-date-number">
-              31
-            </div>
+            <div class="nova-calendar-date-number">31</div>
           </div>
           <div class="nova-calendar-date is-next">
-            <div class="nova-calendar-date-number">
-              1
-            </div>
+            <div class="nova-calendar-date-number">1</div>
           </div>
           <div class="nova-calendar-date is-next">
-            <div class="nova-calendar-date-number">
-              2
-            </div>
+            <div class="nova-calendar-date-number">2</div>
           </div>
           <div class="nova-calendar-date is-next">
-            <div class="nova-calendar-date-number">
-              3
-            </div>
+            <div class="nova-calendar-date-number">3</div>
           </div>
           <div class="nova-calendar-date is-next">
-            <div class="nova-calendar-date-number">
-              4
-            </div>
+            <div class="nova-calendar-date-number">4</div>
           </div>
           <div class="nova-calendar-date is-next">
-            <div class="nova-calendar-date-number">
-              5
-            </div>
+            <div class="nova-calendar-date-number">5</div>
           </div>
         </div>
       </div>
       <div class="nova-calendar-sidebar">
-        <div title="上個月" class="nova-calendar-prev">
-          上個月
+        <div tabindex="0" title="上個月" class="nova-calendar-prev">
+          <div class="nova-icon nova-icon-top"><svg viewBox="0 0 24 24" fill="currentColor" width="1em" height="1em">
+              <path d="M12 8.415l-7.071 7.071-1.414-1.415L12 5.586l8.486 8.485-1.415 1.415z"></path>
+            </svg></div>上個月
         </div>
-        <div class="nova-calendar-title"><span class="nova-calendar-title-support"></span> <span class="nova-calendar-title-text">2000年
+        <div class="nova-calendar-title"><span class="nova-calendar-title-support"></span><span class="nova-calendar-title-text">2000年
 1月</span></div>
-        <div title="下個月" class="nova-calendar-next">
-          下個月
+        <div tabindex="0" title="下個月" class="nova-calendar-next">
+          <div class="nova-icon nova-icon-bottom"><svg viewBox="0 0 24 24" fill="currentColor" width="1em" height="1em">
+              <path d="M10.586 17l-7.07-7.07 1.413-1.415L12 15.586l7.072-7.071 1.414 1.415-8.485 8.485z"></path>
+            </svg></div>下個月
         </div>
       </div>
     </div>

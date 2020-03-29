@@ -1,11 +1,11 @@
 <template>
   <section>
-    <NovaDatePicker disabled v-model="date"></NovaDatePicker>
-    <NovaDatePicker disabled type="range" v-model="dates"></NovaDatePicker>
+    <NovaDatePicker v-model="date" disabled></NovaDatePicker>
+    <NovaDatePicker v-model="dates" disabled type="range"></NovaDatePicker>
     <NovaDatePicker
+      v-model="dates"
       :disabled="[false, true]"
       type="range"
-      v-model="dates"
     ></NovaDatePicker>
   </section>
 </template>
@@ -15,9 +15,9 @@ import dayjs from 'dayjs';
 
 export default {
   data() {
-    let now = dayjs().toDate();
-    let start = dayjs().toDate();
-    let end = dayjs()
+    const now = dayjs().toDate();
+    const start = dayjs().toDate();
+    const end = dayjs()
       .add(1, 'month')
       .toDate();
     return {

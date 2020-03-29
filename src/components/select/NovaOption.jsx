@@ -1,8 +1,10 @@
 import Storage from '@/utils/storage';
+import Props from '@/utils/props';
 
 export default {
   name: 'NovaOption',
   inject: ['NovaSelect'],
+  isSelectOption: true,
   props: {
     prefixedClass: {
       type: String,
@@ -21,13 +23,21 @@ export default {
       default: null
     }
   },
+  data() {
+    return {
+      optionId: null
+    };
+  },
   computed: {
     classList() {
       const { isSelected, disabled, prefixedClass } = this;
 
+      const activeOption = this.NovaSelect.getActiveOptionVNode();
+
       return [
         `${prefixedClass}-option`,
         {
+          'is-active': Props.getVNodeProps(activeOption)?.value === this.value,
           'is-selected': isSelected,
           'is-disabled': disabled
         }
@@ -55,10 +65,10 @@ export default {
     }
   },
   created() {
-    this.NovaSelect.addMultipleOption({
-      label: this.label,
-      value: this.value
-    });
+    this.NovaSelect.reload();
+  },
+  destroyed() {
+    this.NovaSelect.removeInvalid();
   },
   methods: {
     handleClick(...args) {
@@ -72,34 +82,27 @@ export default {
       if (!this.NovaSelect.multiple) {
         this.NovaSelect.close();
       }
+    },
+    handleMouseenter() {
+      if (this.disabled) {
+        return;
+      }
+
+      this.NovaSelect.setActiveIndex(
+        this.NovaSelect.getOptionVNodeIndexFromValue(this.value)
+      );
+    },
+    getOptionData() {
+      const { disabled, label, value } = this;
+      return {
+        component: this,
+        disabled,
+        label,
+        value
+      };
     }
   },
   render() {
-    const {
-      $attrs,
-      $listeners,
-      $slots,
-      label,
-      // value,
-      classList,
-      NovaSelect,
-      handleClick
-    } = this;
-
-    const children = $slots.default || label || null?.toString();
-
-    const optionProps = {
-      class: classList,
-      attrs: {
-        ...$attrs
-      },
-      on: {
-        ...$listeners,
-        click: handleClick
-      }
-    };
-
-    const optionNode = <div {...optionProps}>{children}</div>;
-    return NovaSelect.dropdownLoaded ? optionNode : null;
+    return null;
   }
 };

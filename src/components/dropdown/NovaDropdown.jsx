@@ -1,16 +1,25 @@
 import Utils from '@/utils/utils';
+import Storage from '@/utils/storage';
 
 export default {
   name: 'NovaDropdown',
   props: {
+    prefixedClass: {
+      type: String,
+      default: `${Storage.prefix}-dropdown`
+    },
     appendToBody: {
       type: Boolean
     },
     opened: {
       type: Boolean
     },
-    popoverClass: {
+    dropdownClass: {
       type: [String, Array, Object],
+      default: null
+    },
+    width: {
+      type: Number,
       default: null
     }
   },
@@ -27,34 +36,39 @@ export default {
       if (!this.appendToBody) {
         return {};
       }
-      return this.offset;
+      const width = this.width;
+      return Object.assign(
+        {
+          width: `${width}px`
+        },
+        this.offset
+      );
     }
   },
   methods: {
-    setPosition(select) {
-      let selectHeight = select.offsetHeight;
-
-      let offset = Utils.getElementOffset(select);
-
+    setPosition(targetDom) {
+      let targetHeight = targetDom.offsetHeight;
+      let offset = Utils.getElementOffset(targetDom);
       this.offset.left = `${offset.left}px`;
-      this.offset.top = `${offset.top + selectHeight}px`;
+      this.offset.top = `${offset.top + targetHeight}px`;
     },
-    getDom() {
-      return this.$refs['dropdownDom'];
+    getDropdownInternalRef() {
+      return this.$refs['dropdown'];
     }
   },
   render() {
     const {
-      appendToBody,
-      opened,
       $attrs,
       $listeners,
       $slots,
+      appendToBody,
       dropdownStyle,
-      popoverClass
+      opened,
+      dropdownClass,
+      prefixedClass
     } = this;
 
-    const classList = ['nova-dropdown', popoverClass];
+    const classList = [prefixedClass, dropdownClass];
 
     const children = $slots.default;
 
@@ -67,11 +81,11 @@ export default {
       on: {
         ...$listeners
       },
-      ref: 'dropdownDom'
+      ref: 'dropdown'
     };
 
     const dropdownContent = (
-      <transition name="nova-slide-up">
+      <transition name={`${Storage.prefix}-slide-up`}>
         <div v-show={opened} {...dropdownProps}>
           {children}
         </div>

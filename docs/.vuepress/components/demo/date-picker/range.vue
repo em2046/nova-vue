@@ -1,5 +1,5 @@
 <template>
-  <NovaDatePicker @change="onChange" type="range" v-model="date" />
+  <NovaDatePicker v-model="date" type="range" @change="onChange" />
 </template>
 
 <script>
@@ -13,11 +13,11 @@ export default {
   },
   methods: {
     onChange(dates, rangeName) {
-      let startDate = dates[0];
-      let endDate = dates[1];
+      const startDate = dates[0];
+      const endDate = dates[1];
 
-      let startDateFormatted = dayjs(startDate).format('YYYY-MM-DD');
-      let endDateFormatted = dayjs(endDate).format('YYYY-MM-DD');
+      const startDateFormatted = dayjs(startDate).format('YYYY-MM-DD');
+      const endDateFormatted = dayjs(endDate).format('YYYY-MM-DD');
       console.log([startDateFormatted, endDateFormatted], rangeName);
     }
   }

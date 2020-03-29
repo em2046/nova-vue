@@ -93,11 +93,22 @@ export default {
     inGroupClick() {
       this.NovaRadioGroup.setChecked(this.value, true);
     },
-    handleRadioClick() {
+    handleRadioClick(e) {
       if (this.isDisabled) {
         return;
       }
 
+      const target = e.target;
+
+      const targetIsInput = target instanceof HTMLInputElement;
+      const targetIsTextArea = target instanceof HTMLTextAreaElement;
+
+      if (!(targetIsInput || targetIsTextArea)) {
+        this.$refs['input']?.focus();
+        this.setChecked();
+      }
+    },
+    setChecked() {
       if (this.isChecked) {
         return;
       }
@@ -109,6 +120,23 @@ export default {
       } else {
         this.$emit('update', true);
       }
+    },
+    handleKeydown(e) {
+      if (this.isDisabled) {
+        return;
+      }
+
+      switch (e.key) {
+        case 'Spacebar': // IE/Edge
+        case ' ':
+          e.preventDefault();
+          this.setChecked();
+          break;
+        case 'Enter':
+          e.preventDefault();
+          this.setChecked();
+          break;
+      }
     }
   },
   render() {
@@ -117,6 +145,7 @@ export default {
       $listeners,
       $slots,
       classList,
+      handleKeydown,
       handleRadioClick,
       isDisabled,
       label,
@@ -128,8 +157,7 @@ export default {
     const radioProps = {
       class: classList,
       attrs: {
-        ...$attrs,
-        tabindex: tabIndex
+        ...$attrs
       },
       on: {
         ...$listeners,
@@ -138,13 +166,22 @@ export default {
       ref: 'radio'
     };
 
+    const inputProps = {
+      class: [`${prefixedClass}-input`],
+      attrs: {
+        tabindex: tabIndex
+      },
+      on: {
+        keydown: handleKeydown
+      },
+      ref: 'input'
+    };
+
     const children = $slots.default || label;
 
     return (
       <div {...radioProps}>
-        <div class={`${prefixedClass}-input`}>
-          <div class={`${prefixedClass}-inner`}></div>
-        </div>
+        <div {...inputProps}></div>
         <div class={`${prefixedClass}-label`}>{children}</div>
       </div>
     );

@@ -92,17 +92,45 @@ export default {
     inGroupClick() {
       this.NovaCheckboxGroup.setChecked(this.value, !this.isChecked, true);
     },
-    handleCheckboxClick() {
+    handleCheckboxClick(e) {
       if (this.isDisabled) {
         return;
       }
 
+      const target = e.target;
+
+      const targetIsInput = target instanceof HTMLInputElement;
+      const targetIsTextArea = target instanceof HTMLTextAreaElement;
+
+      if (!(targetIsInput || targetIsTextArea)) {
+        this.$refs['input']?.focus();
+        this.setChecked();
+      }
+    },
+    setChecked() {
       this.$emit('change', !this.isChecked);
 
       if (this.NovaCheckboxGroup) {
         this.inGroupClick();
       } else {
         this.$emit('update', !this.isChecked);
+      }
+    },
+    handleKeydown(e) {
+      if (this.isDisabled) {
+        return;
+      }
+
+      switch (e.key) {
+        case 'Spacebar': // IE/Edge
+        case ' ':
+          e.preventDefault();
+          this.setChecked();
+          break;
+        case 'Enter':
+          e.preventDefault();
+          this.setChecked();
+          break;
       }
     }
   },
@@ -113,6 +141,7 @@ export default {
       $slots,
       classList,
       handleCheckboxClick,
+      handleKeydown,
       isDisabled,
       label,
       prefixedClass
@@ -123,8 +152,7 @@ export default {
     const checkboxProps = {
       class: classList,
       attrs: {
-        ...$attrs,
-        tabindex: tabIndex
+        ...$attrs
       },
       on: {
         ...$listeners,
@@ -133,13 +161,22 @@ export default {
       ref: 'checkbox'
     };
 
+    const inputProps = {
+      class: [`${prefixedClass}-input`],
+      attrs: {
+        tabindex: tabIndex
+      },
+      on: {
+        keydown: handleKeydown
+      },
+      ref: 'input'
+    };
+
     const children = $slots.default || label;
 
     return (
       <div {...checkboxProps}>
-        <div class={`${prefixedClass}-input`}>
-          <div class={`${prefixedClass}-inner`}></div>
-        </div>
+        <div {...inputProps}></div>
         <div class={`${prefixedClass}-label`}>{children}</div>
       </div>
     );

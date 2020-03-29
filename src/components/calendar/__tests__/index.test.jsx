@@ -1,10 +1,10 @@
 import mountTest from '../../../../tests/shared/mountTest';
 import NovaCalendar from '@/components/calendar/NovaCalendar';
 import { mount } from '@vue/test-utils';
-import zhTW from '@/locales/lang/zh-TW';
+import zhTW from '@/locales/zh-TW';
 import dayjs from 'dayjs';
 
-describe('NovaCalendar.vue', () => {
+describe('NovaCalendar', () => {
   mountTest(NovaCalendar);
 
   it('Calendar should support locale', function() {

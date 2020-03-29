@@ -18,8 +18,8 @@ export default class Utils {
     }
 
     return {
-      left: left,
-      top: top
+      left,
+      top
     };
   }
 
@@ -54,6 +54,16 @@ export default class Utils {
     return to;
   }
 
+  static scrollTo(ele, offset) {
+    const { x = 0, y = 0 } = offset;
+    if (ele.scrollTo) {
+      ele.scrollTo(x, y);
+    } else {
+      ele.scrollTop = y;
+      ele.scrollLeft = x;
+    }
+  }
+
   /**
    * @param ele DOM
    * @param className
@@ -63,7 +73,7 @@ export default class Utils {
       return false;
     }
 
-    let targetClassName = ele.getAttribute('class');
+    const targetClassName = ele.getAttribute('class');
     if (!targetClassName) {
       return false;
     }
@@ -71,5 +81,19 @@ export default class Utils {
     return targetClassName
       .split(' ')
       .some(singleClassName => singleClassName === className);
+  }
+
+  static twoDecimalPlaces(number) {
+    return number.toFixed(2).replace(/(\.)?0+$/, '');
+  }
+
+  static numberLimit(number, low = -Infinity, high = Infinity) {
+    if (number < low) {
+      return low;
+    }
+    if (number > high) {
+      return high;
+    }
+    return number;
   }
 }

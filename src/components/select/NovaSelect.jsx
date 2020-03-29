@@ -1,7 +1,14 @@
-import locale from '@/mixin/locale';
 import Storage from '@/utils/storage';
 import Utils from '@/utils/utils';
+import Props from '@/utils/props';
+import locale from '@/mixin/locale';
 import NovaDropdown from '@/components/dropdown/NovaDropdown.jsx';
+import OptionTree from './OptionTree.jsx';
+
+const POSITION = {
+  BOTTOM: 'BOTTOM',
+  TOP: 'TOP'
+};
 
 export default {
   name: 'NovaSelect',
@@ -40,7 +47,7 @@ export default {
       type: [String, Number, Boolean, Array],
       default: null
     },
-    popoverClass: {
+    dropdownClass: {
       type: String,
       default: null
     }
@@ -49,8 +56,9 @@ export default {
     return {
       dropdownLoaded: false,
       opened: false,
-      currentChild: null,
-      multipleOptions: []
+      allOptions: [],
+      activeIndex: -1,
+      width: null
     };
   },
   computed: {
@@ -64,19 +72,21 @@ export default {
           'is-disabled': disabled
         }
       ];
-    },
-    valueHash() {
-      const hash = {};
-      this.multipleOptions.forEach(option => {
-        hash[option.value] = option;
-      });
-      return hash;
     }
   },
   destroyed() {
-    this.closeDropdown();
+    this.closeDropdown(true);
   },
   methods: {
+    reload() {
+      if (this.dropdownLoaded) {
+        this.dropdownLoaded = false;
+
+        this.$nextTick(() => {
+          this.dropdownLoaded = true;
+        });
+      }
+    },
     hasValue() {
       const value = this.value;
 
@@ -92,6 +102,221 @@ export default {
         default:
           return !!value;
       }
+    },
+    getActiveOptionVNode() {
+      if (this.activeIndex === -1) {
+        return null;
+      }
+      return this.getOptionVNodeFromIndex(this.activeIndex);
+    },
+    getOptionVNodesFromChildren(children, options = []) {
+      if (!children) {
+        return;
+      }
+
+      for (let i = 0; i < children.length; i++) {
+        let child = children[i];
+        if (Props.getVNodeOptions(child)?.isSelectOption) {
+          options.push(child);
+        } else {
+          this.getOptionVNodesFromChildren(
+            child.componentOptions?.children,
+            options
+          );
+        }
+      }
+      return options;
+    },
+    getOptionVNodes() {
+      const children = this.$slots.default;
+      return this.getOptionVNodesFromChildren(children);
+    },
+    getOptionVNodeTreeFromChildren(children, tree = []) {
+      if (!children) {
+        return;
+      }
+
+      for (let i = 0; i < children.length; i++) {
+        let child = children[i];
+        if (Props.getVNodeOptions(child)?.isSelectOptGroup) {
+          tree.push({
+            isOptGroup: true,
+            children: this.getOptionVNodeTreeFromChildren(
+              child.componentOptions?.children
+            ),
+            vNode: child
+          });
+        } else if (Props.getVNodeOptions(child)?.isSelectOption) {
+          tree.push({
+            isOption: true,
+            vNode: child
+          });
+        } else {
+          this.getOptionVNodeTreeFromChildren(
+            child.componentOptions?.children,
+            tree
+          );
+        }
+      }
+
+      return tree;
+    },
+    getOptionVNodeTree() {
+      const children = this.$slots.default;
+      return this.getOptionVNodeTreeFromChildren(children);
+    },
+    getOptionVNodeFromIndex(index) {
+      const options = this.getOptionVNodes();
+      return options[index];
+    },
+    getOptionVNodeIndexFromValue(value) {
+      const options = this.getOptionVNodes();
+      if (!options) {
+        return;
+      }
+      return options.findIndex(option => {
+        return Props.getVNodeProps(option)?.value === value;
+      });
+    },
+    setActiveIndex(index) {
+      this.activeIndex = index;
+    },
+    moveDown() {
+      if (!this.opened) {
+        this.handleInput();
+        return;
+      }
+
+      let nextIndex = this.activeIndex;
+      const options = this.getOptionVNodes();
+      const size = options.length;
+
+      nextIndex++;
+      for (let i = 0; i < size; i++) {
+        const option = options[nextIndex];
+
+        if (!option) {
+          break;
+        }
+
+        const propsData = Props.getVNodeProps(option);
+
+        if (Props.isBooleanPropsTrue(propsData?.disabled)) {
+          nextIndex++;
+          continue;
+        }
+
+        break;
+      }
+
+      if (nextIndex >= size) {
+        nextIndex = -1;
+      }
+      this.activeIndex = nextIndex;
+      this.refreshScroll(nextIndex, POSITION.BOTTOM);
+    },
+    moveUp() {
+      if (!this.opened) {
+        this.handleInput();
+        return;
+      }
+
+      let prevIndex = this.activeIndex;
+      const options = this.getOptionVNodes();
+      const size = options.length;
+
+      prevIndex--;
+      for (let i = 0; i < size; i++) {
+        if (prevIndex < -1) {
+          prevIndex = size - 1;
+        }
+
+        if (!this.getOptionVNodeFromIndex(prevIndex)) {
+          break;
+        }
+
+        const option = options[prevIndex];
+        const propsData = Props.getVNodeProps(option);
+
+        if (Props.isBooleanPropsTrue(propsData?.disabled)) {
+          prevIndex--;
+          continue;
+        }
+        break;
+      }
+
+      this.activeIndex = prevIndex;
+      this.refreshScroll(prevIndex, POSITION.TOP);
+    },
+    handleInput() {
+      if (this.opened) {
+        return;
+      }
+
+      const $toggle = this.$refs['toggle'];
+      this.handleToggleClick($toggle);
+    },
+    handleEnter() {
+      if (!this.opened) {
+        const $toggle = this.$refs['toggle'];
+        this.handleToggleClick($toggle);
+        return;
+      }
+
+      const activeOption = this.getActiveOptionVNode();
+
+      const closeSingle = () => {
+        if (!this.multiple) {
+          this.close();
+        }
+      };
+
+      if (!activeOption) {
+        closeSingle();
+        return;
+      }
+
+      this.setSelected(Props.getVNodeProps(activeOption)?.value);
+      closeSingle();
+    },
+    refreshScrollImplement: function(index, position) {
+      const $optionTree = this.$refs['optionTree'];
+      const optionDom = $optionTree.getOptionDomOfIndex(index);
+
+      if (!optionDom) {
+        return;
+      }
+
+      const $dropdown = this.getDropdownInternalRef();
+
+      const scrollTop = $dropdown.scrollTop;
+      const listHeight = $dropdown.clientHeight;
+
+      const offsetTop = optionDom.offsetTop;
+      const itemHeight = optionDom.clientHeight;
+
+      const underTop = offsetTop >= scrollTop;
+      const aboveBottom = offsetTop <= scrollTop + listHeight - itemHeight;
+
+      if (!(underTop && aboveBottom)) {
+        if (position === POSITION.BOTTOM) {
+          Utils.scrollTo($dropdown, {
+            x: 0,
+            y: offsetTop - listHeight + itemHeight
+          });
+        }
+        if (position === POSITION.TOP) {
+          Utils.scrollTo($dropdown, {
+            x: 0,
+            y: offsetTop
+          });
+        }
+      }
+    },
+    refreshScroll(index, position) {
+      setTimeout(() => {
+        this.refreshScrollImplement(index, position);
+      }, 0);
     },
     displayedLabel() {
       const value = this.value;
@@ -109,11 +334,15 @@ export default {
       }
     },
     valueToLabel(value) {
-      const found = this.valueHash[value];
-      if (found !== null && found !== undefined) {
-        return found.label;
+      const optionVNodes = this.getOptionVNodes();
+      if (!optionVNodes) {
+        return;
       }
-      return '';
+      const foundOptionVNode = optionVNodes.find(optionVNode => {
+        return Props.getVNodeProps(optionVNode)?.value === value;
+      });
+      const label = Props.getVNodeProps(foundOptionVNode)?.label;
+      return label;
     },
     setSelected(value) {
       if (this.multiple) {
@@ -135,6 +364,35 @@ export default {
           this.$emit('change', value);
         }
       }
+
+      this.$refs['select'].focus();
+    },
+    removeInvalid() {
+      const optionVNodes = this.getOptionVNodes() || [];
+
+      const valueList = optionVNodes.map(optionVNode => {
+        return Props.getVNodeProps(optionVNode)?.value;
+      });
+
+      let valueHash = {};
+      valueList.forEach(value => {
+        valueHash[value] = true;
+      });
+
+      if (this.multiple) {
+        const oldValue = this.value.slice();
+        const newValue = oldValue.filter(value => {
+          return valueHash[value];
+        });
+        this.$emit('update', newValue);
+      } else {
+        if (!valueHash[this.value]) {
+          this.$emit('update', null);
+        }
+      }
+    },
+    getSingleSelectedIndex() {
+      return this.getOptionVNodeIndexFromValue(this.value);
     },
     getValue() {
       return this.value;
@@ -143,13 +401,13 @@ export default {
       this.opened = false;
       this.closeDropdown();
     },
-    handleToggleClick(e) {
+    handleToggleClick(target) {
       const { prefixedClass } = this;
 
       if (!this.dropdownLoaded) {
         this.dropdownLoaded = true;
         this.$nextTick(() => {
-          this.handleToggleClick(e);
+          this.handleToggleClick(target);
         });
         return;
       }
@@ -158,7 +416,6 @@ export default {
         return;
       }
 
-      const target = e.target;
       const isDelete = Utils.hasClassName(
         target,
         `${prefixedClass}-label-delete`
@@ -177,6 +434,17 @@ export default {
     openDropdown() {
       document.addEventListener('click', this.handleOtherClick);
       this.$emit('open');
+
+      if (!this.multiple) {
+        const singleSelectedIndex = this.getSingleSelectedIndex();
+        this.activeIndex = singleSelectedIndex;
+
+        this.refreshScroll(singleSelectedIndex, POSITION.TOP);
+      } else {
+        this.activeIndex = -1;
+      }
+
+      this.width = this.$refs['select'].offsetWidth;
       this.refreshDropdown();
     },
     refreshDropdown() {
@@ -189,16 +457,19 @@ export default {
     handleTransitionFinished() {
       this.refreshDropdown();
     },
-    closeDropdown() {
+    closeDropdown(notEmit) {
       document.removeEventListener('click', this.handleOtherClick);
-      this.$emit('close');
+
+      if (!notEmit) {
+        this.$emit('close');
+      }
     },
     handleOtherClick(e) {
       const $select = this.$refs['select'];
       const stopToggle = Utils.isParentsOrSelf(e.target, $select);
       const stopDropdown = Utils.isParentsOrSelf(
         e.target,
-        this.getDropdownDom()
+        this.getDropdownInternalRef()
       );
 
       if (!(stopToggle || stopDropdown)) {
@@ -207,9 +478,6 @@ export default {
         this.closeDropdown();
       }
     },
-    addMultipleOption(option) {
-      this.multipleOptions.push(option);
-    },
     handleDeleteClick(value) {
       if (this.disabled) {
         return;
@@ -217,8 +485,44 @@ export default {
 
       this.setSelected(value);
     },
-    getDropdownDom() {
-      return this.$refs['dropdown'].getDom();
+    getDropdownInternalRef() {
+      return this.$refs['dropdown'].getDropdownInternalRef();
+    },
+    handleKeydown(e) {
+      if (this.disabled) {
+        return;
+      }
+
+      switch (e.key) {
+        case 'Down': // IE/Edge
+        case 'ArrowDown':
+          e.preventDefault();
+          this.moveDown();
+          break;
+        case 'Up': // IE/Edge
+        case 'ArrowUp':
+          e.preventDefault();
+          this.moveUp();
+          break;
+        case 'Spacebar': // IE/Edge
+        case ' ':
+          e.preventDefault();
+          this.handleEnter();
+          break;
+        case 'Enter':
+          e.preventDefault();
+          this.handleEnter();
+          break;
+        case 'Tab':
+          this.close();
+          break;
+        case 'Esc': // IE/Edge
+        case 'Escape':
+          this.close();
+          break;
+        default:
+          this.handleInput();
+      }
     }
   },
   render() {
@@ -226,22 +530,25 @@ export default {
       $attrs,
       $listeners,
       $slots,
+      appendToBody,
       classList,
       disabled,
-      opened,
-      appendToBody,
-      dropdownLoaded,
-      popoverClass,
-      handleToggleClick,
-      getPlaceholder,
       displayedLabel,
-      value,
-      multiple,
-      hasValue,
-      handleTransitionFinished,
-      valueToLabel,
+      dropdownLoaded,
+      getPlaceholder,
       handleDeleteClick,
-      prefixedClass
+      handleKeydown,
+      handleToggleClick,
+      handleTransitionFinished,
+      hasValue,
+      multiple,
+      novaLocale,
+      opened,
+      dropdownClass,
+      prefixedClass,
+      value,
+      valueToLabel,
+      width
     } = this;
 
     const selectProps = {
@@ -251,16 +558,22 @@ export default {
         tabindex: !disabled ? 0 : -1
       },
       on: {
-        ...$listeners
+        ...$listeners,
+        keydown: handleKeydown
       },
       ref: 'select'
     };
 
     const dropdownProps = {
       props: {
+        width,
         opened,
         appendToBody: appendToBody && dropdownLoaded,
-        popoverClass: [`${prefixedClass}-dropdown`, popoverClass]
+        dropdownClass: [
+          `${prefixedClass}-dropdown`,
+          { [`${prefixedClass}-multiple-dropdown`]: multiple },
+          dropdownClass
+        ]
       },
       ref: 'dropdown'
     };
@@ -284,7 +597,9 @@ export default {
         );
       } else {
         textNode = (
-          <span class={textClassName}>{displayedLabel() || value}</span>
+          <span class={textClassName}>
+            {displayedLabel() || value?.toString()}
+          </span>
         );
       }
 
@@ -336,16 +651,28 @@ export default {
       multipleNode = [placeholderNode, textNode];
     }
 
+    let optionTreeNode;
+    if (dropdownLoaded) {
+      optionTreeNode = (
+        <OptionTree novaLocale={novaLocale} ref="optionTree"></OptionTree>
+      );
+    }
+
     return (
       <div {...selectProps}>
-        <div class={`${prefixedClass}-toggle`} onClick={handleToggleClick}>
+        <div
+          class={`${prefixedClass}-toggle`}
+          onClick={e => {
+            handleToggleClick(e.target);
+          }}
+          ref="toggle"
+        >
           <span class={`${prefixedClass}-arrow`}></span>
-          <ClientOnly>
-            {singleNode}
-            {multipleNode}
-          </ClientOnly>
+          {singleNode}
+          {multipleNode}
         </div>
-        <NovaDropdown {...dropdownProps}>{children}</NovaDropdown>
+        <NovaDropdown {...dropdownProps}>{optionTreeNode}</NovaDropdown>
+        {children}
       </div>
     );
   }

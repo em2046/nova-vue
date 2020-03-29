@@ -11,10 +11,7 @@
         @panelChange="handlePanelChange"
       >
         <template v-slot:dateCellRender="slotProps">
-          <div
-            class="date-cell"
-            @mouseenter="handleCellEnter($event, slotProps)"
-          >
+          <div class="date-cell">
             <div class="calendar-num">
               {{ getDayOfMonth(slotProps.date) }}
             </div>
@@ -35,6 +32,7 @@
         <a class="calendar-more" href="">
           <template>{{ dayjs(calendarDate).format('YYYY-MM') }}</template>
           <template>{{ '更多' }}</template>
+          <NovaIconRight></NovaIconRight>
         </a>
       </div>
     </div>
@@ -49,14 +47,15 @@
 
 <script>
 import dayjs from 'dayjs';
-import holiday from '@/locales/holiday/china';
+import holiday from '@/locales/holiday/zh-CN';
 import NovaCalendar from '@/components/calendar/NovaCalendar';
 import NovaLocale from '@/components/locale/NovaLocale';
-import en from '@/locales/lang/en';
+import en from '@/locales/en';
+import NovaIconRight from '@/icons/NovaIconRight';
 
 export default {
   name: 'CalendarDemo',
-  components: { NovaLocale, NovaCalendar },
+  components: { NovaIconRight, NovaLocale, NovaCalendar },
   data() {
     return {
       en,
@@ -94,9 +93,6 @@ export default {
     },
     handlePanelChange(date) {
       console.log(dayjs(date).format('YYYY-MM-DD'));
-    },
-    handleCellEnter(e, slotProps) {
-      console.log(slotProps);
     }
   }
 };
@@ -133,16 +129,9 @@ export default {
 }
 
 .calendar-more {
-  &:before {
-    content: '';
-    background-image: url(../../assets/icons/calendar-more.svg);
-    width: 10px;
-    height: 10px;
-    float: right;
-    vertical-align: top;
-    display: inline-block;
-    margin-top: 5px;
-  }
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 
 .calendar-num {

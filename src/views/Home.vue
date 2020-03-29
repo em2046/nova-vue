@@ -1,13 +1,15 @@
 <template>
   <div class="home">
     <div class="box link-box">
+      <router-link to="/icon">Icon</router-link>
       <router-link to="/select">Select</router-link>
       <router-link to="/radio">Radio</router-link>
       <router-link to="/checkbox">Checkbox</router-link>
       <router-link to="/date-picker">DatePicker</router-link>
       <router-link to="/calendar">Calendar</router-link>
       <router-link to="/alert">Alert</router-link>
-      <router-link to="/autocomplete">Autocomplete</router-link>
+      <router-link to="/auto-complete">AutoComplete</router-link>
+      <router-link to="/progress">Progress</router-link>
     </div>
   </div>
 </template>

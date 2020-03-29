@@ -1,0 +1,26 @@
+@import '../../../styles/var';
+
+.nova-progress-circle {
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+
+  .nova-progress-trail{
+    stroke: @section-background;
+    fill: none;
+  }
+
+  .nova-progress-bg {
+    stroke: @primary-color;
+    fill: none;
+    transition: stroke-dasharray @normal-motion;
+  }
+
+  .nova-progress-text {
+    font-size: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}

@@ -1,14 +1,14 @@
 <template>
   <section>
     <NovaDatePicker
-      :disabled-date="disabledDate"
       v-model="date"
+      :disabled-date="disabledDate"
     ></NovaDatePicker>
     <NovaDatePicker
-      :disabled-date="disabledDateRange"
-      @change="handleRangeChange"
-      type="range"
       v-model="dates"
+      :disabled-date="disabledDateRange"
+      type="range"
+      @change="onRangeChange"
     ></NovaDatePicker>
   </section>
 </template>
@@ -25,17 +25,17 @@ export default {
   },
   methods: {
     disabledDate(current) {
-      let today = dayjs().startOf('day');
+      const today = dayjs().startOf('day');
       return current < today;
     },
     disabledDateRange(current, rangeName) {
-      let today = dayjs().startOf('day');
+      const today = dayjs().startOf('day');
       switch (rangeName) {
         case 'start':
           return current < today;
         case 'end':
-          let dates = this.dates;
-          let startDate = dates[0];
+          const dates = this.dates;
+          const startDate = dates[0];
           return (
             current < today ||
             dayjs(startDate || today)
@@ -46,12 +46,12 @@ export default {
           return false;
       }
     },
-    handleRangeChange(dates, rangeName) {
-      let startDate = dates[0];
-      let endDate = dates[1];
+    onRangeChange(dates, rangeName) {
+      const startDate = dates[0];
+      const endDate = dates[1];
       if (rangeName === 'start' && startDate && endDate) {
-        let limitDate = dayjs(startDate).add(30, 'day');
-        let overLimit = limitDate.isBefore(endDate);
+        const limitDate = dayjs(startDate).add(30, 'day');
+        const overLimit = limitDate.isBefore(endDate);
         if (overLimit) {
           this.dates[1] = limitDate.toDate();
         }

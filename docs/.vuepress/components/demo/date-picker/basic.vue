@@ -1,5 +1,5 @@
 <template>
-  <NovaDatePicker @change="onChange" v-model="date" />
+  <NovaDatePicker v-model="date" @change="onChange" />
 </template>
 
 <script>
@@ -13,7 +13,7 @@ export default {
   },
   methods: {
     onChange(date) {
-      let dateFormatted = dayjs(date).format('YYYY-MM-DD');
+      const dateFormatted = dayjs(date).format('YYYY-MM-DD');
       console.log(dateFormatted);
     }
   }

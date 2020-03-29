@@ -3,10 +3,6 @@
 
 @checkbox: ~'@{prefix}-checkbox';
 
-@checkWidth: 4.94974747px; // sqrt(7^2 / 2)
-@checkHeight: 8.4852814px; // sqrt(12^2 / 2)
-@checkTop: 1.41421356px; // sqrt(2^2 / 2)
-
 .@{checkbox} {
   cursor: pointer;
   line-height: 20px;
@@ -16,16 +12,6 @@
   font-family: @font-family;
   color: @font-color;
 
-  &:focus {
-    outline: none;
-
-    &:not(.is-disabled) {
-      .@{checkbox}-input {
-        border: 1px solid #ee3388;
-      }
-    }
-  }
-
   &.is-disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -33,19 +19,28 @@
 
   &:hover:not(.is-disabled) {
     .@{checkbox}-input {
-      border: 1px solid #ee3388;
+      border: 1px solid @primary-color;
     }
   }
 
   &.is-checked {
     .@{checkbox}-input {
-      border: 1px solid #ee3388;
+      border: 1px solid @primary-color;
     }
 
-    .@{checkbox}-inner {
+    .@{checkbox}-input {
       &:before {
         transform: rotate(45deg) scale(1);
         opacity: 1;
+      }
+    }
+  }
+
+  &:not(.is-disabled) {
+    .@{checkbox}-input {
+      &:focus {
+        border: 1px solid @primary-color;
+        box-shadow: @focus-shadow-primary;
       }
     }
   }
@@ -57,13 +52,17 @@
   width: 14px;
   height: 14px;
   margin-top: 8px;
-  border: 1px solid #cccccc;
+  border: 1px solid @border-color;
   box-sizing: border-box;
   position: relative;
   background-color: @component-background;
+
+  &:focus {
+    outline: none;
+  }
 }
 
-.@{checkbox}-inner {
+.@{checkbox}-input {
   &:before {
     opacity: 0;
     margin-top: (12 - @checkHeight) / 2 - @checkTop / 2;
@@ -73,7 +72,7 @@
     height: @checkHeight;
     content: '';
     display: block;
-    border: 2px solid #ee3388;
+    border: 2px solid @primary-color;
     border-top: none;
     border-left: none;
     transform: rotate(45deg) scale(0);

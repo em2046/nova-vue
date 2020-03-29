@@ -1,30 +1,33 @@
 <template>
   <section>
     <NovaDatePicker
-      :locale="en"
-      format="ddd MMM DD YYYY"
       v-model="date"
+      :locale="en"
+      :holiday="hideHoliday"
+      format="ddd MMM DD YYYY"
     ></NovaDatePicker>
     <NovaDatePicker
+      v-model="dates"
       format="YYYY年 M月 D日"
       type="range"
-      v-model="dates"
     ></NovaDatePicker>
   </section>
 </template>
 
 <script>
+import { en } from 'nova-vue';
 import dayjs from 'dayjs';
 
 export default {
   data() {
-    let now = dayjs().toDate();
-    let start = dayjs().toDate();
-    let end = dayjs()
+    const now = dayjs().toDate();
+    const start = dayjs().toDate();
+    const end = dayjs()
       .add(1, 'month')
       .toDate();
     return {
-      en: nova.locale.en,
+      en,
+      hideHoliday: {},
       date: now,
       dates: [start, end]
     };

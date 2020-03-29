@@ -1,7 +1,7 @@
 <template>
   <section>
     <p>
-      <NovaCheckbox :disabled="disabled" v-model="checked">
+      <NovaCheckbox v-model="checked" :disabled="disabled">
         {{ checked ? 'Checked' : 'Unchecked' }}
         -
         {{ disabled ? 'Disabled' : 'Enabled' }}
@@ -37,7 +37,7 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style scoped>
 p {
   line-height: 20px;
   margin-top: 0;

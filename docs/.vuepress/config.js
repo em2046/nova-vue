@@ -1,3 +1,5 @@
+const path = require('path')
+
 module.exports = {
   title: 'Nova Vue',
   description: '前端组件库 Vue 实现',
@@ -20,7 +22,7 @@ module.exports = {
         title: '数据录入',
         collapsable: false,
         children: [
-          '/autocomplete/',
+          '/auto-complete/',
           '/checkbox/',
           '/date-picker/',
           '/radio/',
@@ -38,5 +40,8 @@ module.exports = {
         children: ['/alert/']
       }
     ]
+  },
+  chainWebpack: config => {
+    config.resolve.alias.set('nova-vue', path.resolve(__dirname, '../..'),);
   }
 };

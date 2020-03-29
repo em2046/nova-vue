@@ -8,16 +8,59 @@
   color: @font-color;
 
   &:hover:not(.is-disabled) {
-    color: #ee3388;
+    color: @primary-color;
+    background-color: #fef2f9;
+  }
+
+  &.is-active {
     background-color: #fef2f9;
   }
 
   &.is-selected {
-    color: #ee3388;
+    color: @primary-color;
   }
 
   &.is-disabled {
     opacity: 0.5;
     cursor: default;
+  }
+}
+
+.@{select}-option-empty {
+  .@{prefix}-alert {
+    padding-left: 30px;
+    padding-right: 10px;
+  }
+}
+
+.@{select}-multiple-dropdown {
+  .@{select}-option {
+    padding-right: 30px;
+
+    &:before {
+      right: 10px;
+      top: 50%;
+      position: absolute;
+      opacity: 0;
+      box-sizing: border-box;
+      width: @checkWidth;
+      height: @checkHeight;
+      content: '';
+      display: block;
+      border: 2px solid @primary-color;
+      border-top: none;
+      border-left: none;
+      transform: translate(0, -50%) rotate(45deg) scale(0);
+      transition: transform @normal-motion @ease-out-backward;
+    }
+
+    &.is-selected {
+      position: relative;
+
+      &:before {
+        transform: translate(0, -50%) rotate(45deg) scale(1);
+        opacity: 1;
+      }
+    }
   }
 }
