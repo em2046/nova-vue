@@ -1,6 +1,6 @@
 import debounce from 'lodash/debounce';
 import Utils from '@/utils/utils';
-import Storage from '@/utils/storage';
+import Inventory from '@/utils/inventory';
 import locale from '@/mixin/locale';
 import NovaDropdown from '@/components/dropdown/NovaDropdown.jsx';
 import NovaAlert from '@/components/alert/NovaAlert.jsx';
@@ -20,7 +20,7 @@ export default {
   props: {
     prefixedClass: {
       type: String,
-      default: `${Storage.prefix}-auto-complete`
+      default: `${Inventory.prefix}-auto-complete`
     },
     value: {
       type: String,
@@ -121,7 +121,7 @@ export default {
       return null;
     }
   },
-  destroyed() {
+  beforeDestroy() {
     this.closeDropdown(true);
   },
   methods: {
@@ -225,11 +225,11 @@ export default {
         this.list.activeIndex = -1;
       });
     },
-    closeStartDropdown(notEmit) {
+    closeStartDropdown(skipEmit = false) {
       this.start.opened = false;
       document.removeEventListener('click', this.startOtherClick);
 
-      if (!notEmit) {
+      if (!skipEmit) {
         this.$emit('close', 'start');
       }
     },
@@ -357,9 +357,9 @@ export default {
       this.refreshItemScrollTop(newIndex, POSITION.TOP);
     },
     select() {},
-    closeDropdown(notEmit) {
-      this.closeStartDropdown(notEmit);
-      this.closeListDropdown(notEmit);
+    closeDropdown(skipEmit = false) {
+      this.closeStartDropdown(skipEmit);
+      this.closeListDropdown(skipEmit);
     },
     cancelSearch() {
       this.closeDropdown();
@@ -368,7 +368,7 @@ export default {
       setTimeout(() => {
         this.queryString = this.valueModel;
         this.searchDebounce.call();
-      }, 0);
+      });
     },
     searchImplement() {
       if (this.queryString === '') {
@@ -442,11 +442,11 @@ export default {
         this.closeListDropdown();
       }
     },
-    closeListDropdown(notEmit) {
+    closeListDropdown(skipEmit = false) {
       this.list.opened = false;
       document.removeEventListener('click', this.listOtherClick);
 
-      if (!notEmit) {
+      if (!skipEmit) {
         this.$emit('close', 'list');
       }
     },
@@ -511,7 +511,7 @@ export default {
   render() {
     const {
       $attrs,
-      $listenrs,
+      $listeners,
       $scopedSlots,
       $slots,
       appendToBody,
@@ -689,7 +689,7 @@ export default {
         ...$attrs
       },
       on: {
-        ...$listenrs
+        ...$listeners
       }
     };
     return (

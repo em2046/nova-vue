@@ -2,17 +2,80 @@ import {
   computed,
   createElement,
   reactive,
-  ref,
   watchEffect
 } from '@vue/composition-api';
 import Utils from '@/utils/utils';
+import Inventory from '@/utils/inventory';
 
 // eslint-disable-next-line no-unused-vars
 const h = createElement;
 
+function useInner(state) {
+  const innerStyle = reactive({
+    width: `${state.width}px`,
+    height: `${state.width}px`
+  });
+
+  function updateInnerStyle() {
+    const widthPixels = `${state.width}px`;
+    innerStyle['width'] = widthPixels;
+    innerStyle['height'] = widthPixels;
+  }
+
+  watchEffect(() => {
+    updateInnerStyle();
+  });
+
+  return { innerStyle };
+}
+
+function useBg(state) {
+  const bgStyle = reactive({
+    ['stroke-dasharray']: getDasharray(state.percent),
+    ['stroke-width']: state.percent === 0 ? `0` : state.strokeWidth
+  });
+
+  let timer;
+
+  function getDasharray(percent) {
+    const circumference = state.circumference;
+    const bgLength = circumference * percent;
+    const bgLengthText = Utils.twoDecimalPlaces(bgLength);
+    const circumferenceText = Utils.twoDecimalPlaces(circumference);
+
+    return `${bgLengthText} ${circumferenceText}`;
+  }
+
+  function updateBgStyle() {
+    clearTimeout(timer);
+
+    bgStyle['stroke-dasharray'] = getDasharray(state.percent);
+
+    if (state.percent === 0) {
+      timer = setTimeout(() => {
+        bgStyle['stroke-width'] = `0`;
+      }, 200);
+    } else {
+      bgStyle['stroke-width'] = state.strokeWidth;
+    }
+  }
+
+  watchEffect(() => {
+    updateBgStyle();
+  });
+
+  return {
+    bgStyle
+  };
+}
+
 export default {
   name: 'ProgressCircle',
   props: {
+    prefixedClass: {
+      type: String,
+      default: `${Inventory.prefix}-progress`
+    },
     width: {
       type: Number,
       default: 100
@@ -35,139 +98,125 @@ export default {
     }
   },
   setup: (props, context) => {
-    const percent = ref(Utils.numberLimit(props.percent, 0, 1));
+    const { attrs, listeners } = context;
 
-    const width = ref(Utils.numberLimit(props.width, 0));
-    const halfWidth = computed(() => {
-      return width.value / 2;
-    });
+    const state = reactive({
+      width: Utils.numberLimit(props.width, 0),
+      strokeWidth: Utils.numberLimit(props.strokeWidth, 0, props.width / 2),
+      halfWidth: computed(() => {
+        return state.width / 2;
+      }),
+      radius: computed(() => {
+        return (state.width - state.strokeWidth) / 2;
+      }),
+      circumference: computed(() => {
+        return Math.PI * (state.width - state.strokeWidth);
+      }),
 
-    const strokeWidth = ref(
-      Utils.numberLimit(props.strokeWidth, 0, width.value / 2)
-    );
-
-    const radius = computed(() => {
-      return (width.value - strokeWidth.value) / 2;
-    });
-
-    const circumference = computed(() => {
-      return Math.PI * (width.value - strokeWidth.value);
-    });
-
-    const innerStyle = reactive({
-      width: `${width.value}px`,
-      height: `${width.value}px`
-    });
-
-    const bgStyle = reactive({
-      ['stroke-dasharray']: calcDashArray(percent.value),
-      ['stroke-dashoffset']: `0`,
-      ['stroke-width']: percent.value === 0 ? `0` : strokeWidth.value
-    });
-
-    const percentFormatted = computed(() => {
-      let number = percent.value * 100;
-      if (number < 0) {
-        number = 0;
-      }
-      if (number > 100) {
-        number = 100;
-      }
-
-      return `${Utils.twoDecimalPlaces(number)}%`;
-    });
-
-    const circleClassList = computed(() => [
-      `nova-progress`,
-      `nova-progress-circle`,
-      {
-        [`nova-progress-show-info`]: props.showInfo
-      }
-    ]);
-
-    function calcDashArray(percentValue) {
-      const bgSize = circumference.value * percentValue;
-      const bgSizeText = Utils.twoDecimalPlaces(bgSize);
-      const circumferenceText = Utils.twoDecimalPlaces(circumference.value);
-
-      return `${bgSizeText} ${circumferenceText}`;
-    }
-
-    let timer;
-
-    function calcBgSize() {
-      clearTimeout(timer);
-
-      bgStyle['stroke-dasharray'] = calcDashArray(percent.value);
-
-      if (percent.value === 0) {
-        timer = setTimeout(() => {
-          bgStyle['stroke-width'] = `0`;
-        }, 200);
-      } else {
-        bgStyle['stroke-width'] = strokeWidth.value;
-      }
-    }
-
-    function updateInnerStyle() {
-      const widthPixels = `${width.value}px`;
-      innerStyle['width'] = widthPixels;
-      innerStyle['height'] = widthPixels;
-    }
-
-    let textNode = computed(() => {
-      if (props.showInfo) {
-        return <div class={`nova-progress-text`}>{percentFormatted.value}</div>;
-      }
+      percent: Utils.numberLimit(props.percent, 0, 1),
+      percentFormatted: computed(() => {
+        return `${Utils.twoDecimalPlaces(state.percent * 100)}%`;
+      })
     });
 
     watchEffect(() => {
-      const newPercent = Utils.numberLimit(props.percent, 0, 1);
-      percent.value = newPercent;
+      state.percent = Utils.numberLimit(props.percent, 0, 1);
 
-      const newWidth = Utils.numberLimit(props.width, 0);
-      width.value = newWidth;
-
-      const newStrokeWidth = Utils.numberLimit(
-        props.strokeWidth,
-        0,
-        newWidth / 2
-      );
-      strokeWidth.value = newStrokeWidth;
-
-      calcBgSize();
-      updateInnerStyle();
+      const width = props.width;
+      state.width = Utils.numberLimit(width, 0);
+      state.strokeWidth = Utils.numberLimit(props.strokeWidth, 0, width / 2);
     });
 
-    return () => (
-      <div class={circleClassList.value} {...context}>
-        <div class={`nova-progress-inner`} style={innerStyle}>
+    const { bgStyle } = useBg(state);
+    const { innerStyle } = useInner(state);
+
+    const circleClassList = computed(() => [
+      props.prefixedClass,
+      `${props.prefixedClass}-circle`,
+      {
+        [`${props.prefixedClass}-show-info`]: props.showInfo
+      }
+    ]);
+
+    const circleProps = {
+      attrs,
+      on: listeners
+    };
+
+    return () => {
+      function renderBg() {
+        return (
+          <circle
+            class={`${props.prefixedClass}-bg`}
+            stroke-dashoffset="0"
+            stroke-linecap={props.strokeLinecap}
+            style={bgStyle}
+            cx={state.halfWidth}
+            cy={state.halfWidth}
+            r={state.radius}
+          />
+        );
+      }
+
+      function renderTrail() {
+        return (
+          <circle
+            class={`${props.prefixedClass}-trail`}
+            stroke-linecap={props.strokeLinecap}
+            stroke-width={state.strokeWidth}
+            cx={state.halfWidth}
+            cy={state.halfWidth}
+            r={state.radius}
+          />
+        );
+      }
+
+      function renderSvg() {
+        const trailNode = renderTrail();
+        const bgNode = renderBg();
+
+        return (
           <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={width.value}
-            height={width.value}
-            viewBox={`0 0 ${width.value} ${width.value}`}
+            class={`${props.prefixedClass}-svg`}
+            width={state.width}
+            height={state.width}
+            viewBox={`0 0 ${state.width} ${state.width}`}
           >
-            <circle
-              stroke-linecap={props.strokeLinecap}
-              stroke-width={strokeWidth.value}
-              class={`nova-progress-trail`}
-              cx={halfWidth.value}
-              cy={halfWidth.value}
-              r={radius.value}
-            />
-            <circle
-              stroke-linecap={props.strokeLinecap}
-              style={bgStyle}
-              class={`nova-progress-bg`}
-              cx={halfWidth.value}
-              cy={halfWidth.value}
-              r={radius.value}
-            />
+            {trailNode}
+            {bgNode}
           </svg>
-          {textNode.value}
+        );
+      }
+
+      function renderText() {
+        if (props.showInfo) {
+          return (
+            <div class={`${props.prefixedClass}-text`}>
+              {state.percentFormatted}
+            </div>
+          );
+        }
+      }
+
+      function renderInner() {
+        const svgNode = renderSvg();
+        const textNode = renderText();
+
+        return (
+          <div class={`${props.prefixedClass}-inner`} style={innerStyle}>
+            {svgNode}
+            {textNode}
+          </div>
+        );
+      }
+
+      const innerNode = renderInner();
+
+      return (
+        <div class={circleClassList.value} {...circleProps}>
+          {innerNode}
         </div>
-      </div>
-    );
+      );
+    };
   }
 };

@@ -1,4 +1,5 @@
-import Storage from '@/utils/storage';
+import Inventory from '@/utils/inventory';
+import Utils from '@/utils/utils';
 
 export default {
   name: 'NovaRadio',
@@ -14,7 +15,7 @@ export default {
   props: {
     prefixedClass: {
       type: String,
-      default: `${Storage.prefix}-radio`
+      default: `${Inventory.prefix}-radio`
     },
     checked: {
       type: Boolean,
@@ -93,18 +94,27 @@ export default {
     inGroupClick() {
       this.NovaRadioGroup.setChecked(this.value, true);
     },
-    handleRadioClick(e) {
+    handleRadioClick(e, ...restArgs) {
       if (this.isDisabled) {
         return;
       }
+
+      this.$emit('click', e, ...restArgs);
 
       const target = e.target;
 
       const targetIsInput = target instanceof HTMLInputElement;
       const targetIsTextArea = target instanceof HTMLTextAreaElement;
 
-      if (!(targetIsInput || targetIsTextArea)) {
-        this.$refs['input']?.focus();
+      const $label = this.$refs['label'];
+      const familyLink = Utils.getFamilyLink(target, $label);
+      const targetInContentEditable = familyLink.find(element => {
+        return element.isContentEditable;
+      });
+
+      if (!(targetIsInput || targetIsTextArea || targetInContentEditable)) {
+        const $input = this.$refs['input'];
+        $input?.focus();
         this.setChecked();
       }
     },
@@ -182,7 +192,9 @@ export default {
     return (
       <div {...radioProps}>
         <div {...inputProps}></div>
-        <div class={`${prefixedClass}-label`}>{children}</div>
+        <div class={`${prefixedClass}-label`} ref="label">
+          {children}
+        </div>
       </div>
     );
   }

@@ -1,7 +1,11 @@
+@import '../../../styles/var';
 @import './line';
 @import './circle';
 
-.nova-progress {
+@progress: ~'@{prefix}-progress';
+
+.@{progress} {
   color: @font-color;
+  font-family: @font-family;
   line-height: 20px;
 }

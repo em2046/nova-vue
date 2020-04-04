@@ -1,4 +1,5 @@
 import { createElement } from '@vue/composition-api';
+import Inventory from '@/utils/inventory';
 import Line from '@/components/progress/Line.jsx';
 import Circle from '@/components/progress/Circle.jsx';
 
@@ -8,6 +9,10 @@ const h = createElement;
 export default {
   name: 'NovaProgress',
   props: {
+    prefixedClass: {
+      type: String,
+      default: `${Inventory.prefix}-progress`
+    },
     type: {
       type: String,
       default: 'line'
@@ -38,14 +43,21 @@ export default {
     }
   },
   setup: (props, context) => {
+    const { listeners, attrs } = context;
+
     const progressProps = {
       props,
-      ...context
+      attrs,
+      on: listeners
     };
-    if (props.type === 'line') {
-      return () => <Line {...progressProps} />;
-    } else if (props.type === 'circle') {
-      return () => <Circle {...progressProps} />;
+
+    switch (props.type) {
+      case 'line':
+        return () => <Line {...progressProps} />;
+      case 'circle':
+        return () => <Circle {...progressProps} />;
     }
+
+    return null;
   }
 };

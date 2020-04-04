@@ -1,10 +1,11 @@
 import {
-  ref,
+  computed,
   createElement,
-  watchEffect,
-  computed
+  reactive,
+  watchEffect
 } from '@vue/composition-api';
 import Utils from '@/utils/utils';
+import Inventory from '@/utils/inventory';
 
 // eslint-disable-next-line no-unused-vars
 const h = createElement;
@@ -12,6 +13,10 @@ const h = createElement;
 export default {
   name: 'ProgressLine',
   props: {
+    prefixedClass: {
+      type: String,
+      default: `${Inventory.prefix}-progress`
+    },
     percent: {
       type: Number,
       default: 0
@@ -26,51 +31,66 @@ export default {
     }
   },
   setup: (props, context) => {
-    const percent = ref(props.percent);
+    const { attrs, listeners } = context;
 
-    const percentFormatted = computed(() => {
-      let number = percent.value * 100;
-      if (number < 0) {
-        number = 0;
-      }
-      if (number > 100) {
-        number = 100;
-      }
-
-      return `${Utils.twoDecimalPlaces(number)}%`;
-    });
-
-    const lineClassList = computed(() => [
-      `nova-progress`,
-      `nova-progress-line`,
-      {
-        [`nova-progress-show-info`]: props.showInfo,
-        [`nova-progress-status-${props.status}`]: true
-      }
-    ]);
-
-    let textNode = computed(() => {
-      if (props.showInfo) {
-        return <div class={`nova-progress-text`}>{percentFormatted.value}</div>;
-      }
+    const state = reactive({
+      percent: Utils.numberLimit(props.percent, 0, 1),
+      percentFormatted: computed(() => {
+        return `${Utils.twoDecimalPlaces(state.percent * 100)}%`;
+      })
     });
 
     watchEffect(() => {
-      percent.value = props.percent;
+      state.percent = Utils.numberLimit(props.percent, 0, 1);
     });
 
-    return () => (
-      <div class={lineClassList.value} {...context}>
-        <div class={`nova-progress-outer`}>
-          <div class={`nova-progress-inner`}>
-            <div
-              class={`nova-progress-bg`}
-              style={{ width: percentFormatted.value }}
-            />
+    const lineClassList = computed(() => [
+      props.prefixedClass,
+      `${props.prefixedClass}-line`,
+      {
+        [`${props.prefixedClass}-show-info`]: props.showInfo,
+        [`${props.prefixedClass}-status-${props.status}`]: true
+      }
+    ]);
+
+    const lineProps = {
+      attrs,
+      on: listeners
+    };
+
+    return () => {
+      function renderOuter() {
+        return (
+          <div class={`${props.prefixedClass}-outer`}>
+            <div class={`${props.prefixedClass}-inner`}>
+              <div
+                class={`${props.prefixedClass}-bg`}
+                style={{ width: state.percentFormatted }}
+              />
+            </div>
           </div>
+        );
+      }
+
+      function renderText() {
+        if (props.showInfo) {
+          return (
+            <div class={`${props.prefixedClass}-text`}>
+              {state.percentFormatted}
+            </div>
+          );
+        }
+      }
+
+      const outerNode = renderOuter();
+      const textNode = renderText();
+
+      return (
+        <div class={lineClassList.value} {...lineProps}>
+          {outerNode}
+          {textNode}
         </div>
-        {textNode.value}
-      </div>
-    );
+      );
+    };
   }
 };

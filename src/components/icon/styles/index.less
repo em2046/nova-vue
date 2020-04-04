@@ -1,4 +1,8 @@
-.nova-icon {
+@import '../../../styles/var';
+
+@icon: ~'@{prefix}-icon';
+
+.@{icon} {
   width: 1em;
   height: 1em;
   display: inline-block;
@@ -8,5 +12,11 @@
   svg {
     pointer-events: none;
     vertical-align: top;
+  }
+
+  &.@{icon}-spin {
+    svg {
+      animation: @spin 1s linear infinite;
+    }
   }
 }

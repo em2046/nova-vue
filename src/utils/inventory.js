@@ -1,4 +1,8 @@
-export default class Storage {
+const localeDescription = 'nova-locale';
+
+export default class Inventory {
+  static localeSymbol = Symbol?.(localeDescription) ?? localeDescription;
+
   static prefix = 'nova';
 
   static placement = [

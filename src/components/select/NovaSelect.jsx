@@ -1,4 +1,4 @@
-import Storage from '@/utils/storage';
+import Inventory from '@/utils/inventory';
 import Utils from '@/utils/utils';
 import Props from '@/utils/props';
 import locale from '@/mixin/locale';
@@ -25,7 +25,7 @@ export default {
   props: {
     prefixedClass: {
       type: String,
-      default: `${Storage.prefix}-select`
+      default: `${Inventory.prefix}-select`
     },
     disabled: {
       type: Boolean,
@@ -74,7 +74,7 @@ export default {
       ];
     }
   },
-  destroyed() {
+  beforeDestroy() {
     this.closeDropdown(true);
   },
   methods: {
@@ -201,7 +201,7 @@ export default {
 
         const propsData = Props.getVNodeProps(option);
 
-        if (Props.isBooleanPropsTrue(propsData?.disabled)) {
+        if (Props.booleanStandardize(propsData?.disabled)) {
           nextIndex++;
           continue;
         }
@@ -238,7 +238,7 @@ export default {
         const option = options[prevIndex];
         const propsData = Props.getVNodeProps(option);
 
-        if (Props.isBooleanPropsTrue(propsData?.disabled)) {
+        if (Props.booleanStandardize(propsData?.disabled)) {
           prevIndex--;
           continue;
         }
@@ -316,7 +316,7 @@ export default {
     refreshScroll(index, position) {
       setTimeout(() => {
         this.refreshScrollImplement(index, position);
-      }, 0);
+      });
     },
     displayedLabel() {
       const value = this.value;
@@ -457,10 +457,10 @@ export default {
     handleTransitionFinished() {
       this.refreshDropdown();
     },
-    closeDropdown(notEmit) {
+    closeDropdown(skipEmit = false) {
       document.removeEventListener('click', this.handleOtherClick);
 
-      if (!notEmit) {
+      if (!skipEmit) {
         this.$emit('close');
       }
     },
@@ -639,7 +639,7 @@ export default {
       textNode = (
         <div class={`${prefixedClass}-labels`}>
           <transition-group
-            name={`${Storage.prefix}-zoom`}
+            name={`${Inventory.prefix}-check-zoom`}
             onAfterLeave={handleTransitionFinished}
             onEnter={handleTransitionFinished}
           >

@@ -48,6 +48,10 @@ const en = {
       'November',
       'December'
     ]
+  },
+  modal: {
+    ok: 'Ok',
+    cancel: 'Cancel'
   }
 };
 

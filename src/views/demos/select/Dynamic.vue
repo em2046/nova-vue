@@ -49,9 +49,9 @@
       </NovaSelect>
     </div>
     <div class="box">
-      <button @click="handleAddOption">Add option</button>
-      <button @click="handleDeleteOption">Delete option</button>
-      <button @click="handleTest">TEST</button>
+      <NovaButton @click="handleAddOption">Add option</NovaButton>
+      <NovaButton @click="handleDeleteOption">Delete option</NovaButton>
+      <NovaButton @click="handleTest">TEST</NovaButton>
     </div>
   </div>
 </template>
@@ -60,14 +60,13 @@
 import NovaSelect from '@/components/select/NovaSelect';
 import NovaOptGroup from '@/components/select/NovaOptGroup';
 import NovaOption from '@/components/select/NovaOption';
-
-function getRandomInt(low, high) {
-  return Math.floor(low + Math.random() * (high - low));
-}
+import Utils from '@/utils/utils';
+import NovaButton from '@/components/button/NovaButton';
 
 export default {
   name: 'Dynamic',
   components: {
+    NovaButton,
     NovaSelect,
     NovaOptGroup,
     NovaOption
@@ -88,7 +87,7 @@ export default {
   },
   methods: {
     handleAddOption() {
-      const endInt = getRandomInt(1, 1000);
+      const endInt = Utils.getRandomInt(1, 1000);
       this.options.push({
         value: `peach ${endInt}`,
         label: `Peach ${endInt}`,
@@ -96,7 +95,7 @@ export default {
       });
 
       this.$nextTick(() => {
-        const startInt = getRandomInt(1, 1000);
+        const startInt = Utils.getRandomInt(1, 1000);
         this.options.unshift({
           value: `peach ${startInt}`,
           label: `Peach ${startInt}`,
@@ -109,8 +108,15 @@ export default {
       this.options.shift();
     },
     handleTest() {
-      this.n = getRandomInt(2, 10);
+      this.n = Utils.getRandomInt(2, 10);
     }
   }
 };
 </script>
+
+<style scoped>
+.nova-button {
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+</style>

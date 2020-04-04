@@ -1,6 +1,7 @@
-import Storage from '@/utils/storage';
+import Inventory from '@/utils/inventory';
 import zhCN from '@/locales/zh-CN';
 import holiday from '@/locales/holiday/zh-CN';
+import { provide, reactive } from '@vue/composition-api';
 
 export default {
   name: 'NovaLocale',
@@ -12,7 +13,7 @@ export default {
   props: {
     prefixedClass: {
       type: String,
-      default: `${Storage.prefix}-locale`
+      default: `${Inventory.prefix}-locale`
     },
     block: {
       type: Boolean,
@@ -30,6 +31,13 @@ export default {
         return zhCN;
       }
     }
+  },
+  setup(props) {
+    const state = reactive({
+      locale: props.locale,
+      holiday: props.holiday
+    });
+    provide(Inventory.localeSymbol, state);
   },
   render() {
     const { $attrs, $listeners, $slots, block, prefixedClass } = this;

@@ -1,0 +1,243 @@
+@import '../../../styles/var';
+
+@button: ~'@{prefix}-button';
+@icon: ~'@{prefix}-icon';
+
+.@{button} {
+  font-family: @font-family;
+  color: @font-color;
+  vertical-align: top;
+  text-align: center;
+  display: inline-block;
+  cursor: pointer;
+  line-height: 20px;
+  padding: 4px 14px;
+  font-size: 14px;
+  border-radius: 3px;
+  border: 1px solid @border-color;
+  background-color: @component-background;
+  transition: all @fast-motion linear;
+
+  &::-moz-focus-inner {
+    border: none;
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  &:not([disabled]):not(.@{button}-loading) {
+    &:hover,
+    &:focus {
+      color: @secondary-lighter-color;
+      border-color: @secondary-lighter-color;
+    }
+
+    &:focus {
+      box-shadow: @focus-shadow-secondary-light;
+    }
+
+    &:active {
+      color: @secondary-darker-color;
+      border-color: @secondary-darker-color;
+    }
+  }
+
+  &[disabled] {
+    color: @font-color;
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.@{button}-danger {
+    color: @error-color;
+    border-color: @error-color;
+
+    &:not([disabled]):not(.@{button}-loading) {
+      &:hover,
+      &:focus {
+        color: @error-lighter-color;
+        border-color: @error-lighter-color;
+      }
+
+      &:active {
+        color: @error-darker-color;
+        border-color: @error-darker-color;
+      }
+    }
+  }
+
+  &.@{button}-icon-only {
+    padding: 4px 5px;
+
+    &.@{button}-loading {
+      padding-left: 23px;
+    }
+  }
+
+  &.@{button}-loading {
+    opacity: 0.5;
+    cursor: default;
+    padding-left: 32px;
+
+    .@{icon} {
+      margin-left: -18px;
+    }
+  }
+
+  .@{icon} {
+    font-size: 18px;
+    margin-top: 1px;
+
+    & + span {
+      margin-left: 5px;
+    }
+  }
+}
+
+a.@{button} {
+  text-decoration: none;
+}
+
+.@{button}-primary,
+.@{button}-secondary,
+.@{button}-link {
+  color: @component-background;
+  border: none;
+  padding: 5px 15px;
+
+  &.@{button}-loading {
+    padding-left: 33px;
+
+    .@{icon} {
+      margin-left: -18px;
+    }
+  }
+
+  &.@{button}-icon-only {
+    padding: 5px 6px;
+
+    &.@{button}-loading {
+      padding-left: 24px;
+    }
+  }
+
+  &:not([disabled]):not(.@{button}-loading) {
+    &:hover,
+    &:focus {
+      color: @component-background;
+    }
+  }
+}
+
+.@{button}-primary {
+  background-color: @primary-color;
+
+  &:not([disabled]):not(.@{button}-loading) {
+    &:hover,
+    &:focus {
+      color: @component-background;
+      background-color: @primary-lighter-color;
+    }
+
+    &:focus {
+      box-shadow: @focus-shadow-primary-light;
+    }
+
+    &:active {
+      color: @component-background;
+      background-color: @primary-darker-color;
+    }
+  }
+}
+
+.@{button}-secondary {
+  background-color: @secondary-color;
+
+  &:not([disabled]):not(.@{button}-loading) {
+    &:hover,
+    &:focus {
+      color: @component-background;
+      background-color: @secondary-lighter-color;
+    }
+
+    &:active {
+      color: @component-background;
+      background-color: @secondary-darker-color;
+    }
+  }
+}
+
+.@{button}-primary,
+.@{button}-secondary {
+  &[disabled] {
+    color: @component-background;
+  }
+
+  &.@{button}-danger {
+    color: @component-background;
+    background-color: @error-color;
+
+    &:not([disabled]):not(.@{button}-loading) {
+      &:hover,
+      &:focus {
+        color: @component-background;
+        background-color: @error-lighter-color;
+      }
+
+      &:active {
+        color: @component-background;
+        background-color: @error-darker-color;
+      }
+    }
+  }
+}
+
+.@{button}-link {
+  color: @font-color;
+  background: none;
+
+  &:not([disabled]):not(.@{button}-loading) {
+    &:hover,
+    &:focus {
+      color: @primary-lighter-color;
+      background: none;
+    }
+
+    &:focus {
+      box-shadow: @focus-shadow-primary-light;
+    }
+
+    &:active {
+      color: @primary-darker-color;
+    }
+  }
+
+  &.@{button}-danger {
+    color: @error-color;
+
+    &:not([disabled]):not(.@{button}-loading) {
+      &:hover,
+      &:focus {
+        color: @error-lighter-color;
+      }
+
+      &:active {
+        color: @error-darker-color;
+      }
+    }
+  }
+}
+
+.@{button}-danger {
+  &:not([disabled]):not(.@{button}-loading) {
+    &:focus {
+      box-shadow: @focus-shadow-danger-light;
+    }
+  }
+}
+
+.@{button}-block {
+  display: block;
+  width: 100%;
+}

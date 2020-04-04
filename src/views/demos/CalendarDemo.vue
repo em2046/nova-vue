@@ -8,7 +8,11 @@
         :disabled-month-next="disabledMonthNext"
         :disabled-month-prev="disabledMonthPrev"
         :month-size="2"
+        data-id="42"
         @panelChange="handlePanelChange"
+        @click="handleClick"
+        @mouseenter="handleMouseenter"
+        @mouseleave="handleMouseleave"
       >
         <template v-slot:dateCellRender="slotProps">
           <div class="date-cell">
@@ -29,7 +33,11 @@
       </NovaCalendar>
 
       <div class="calendar-footer">
-        <a class="calendar-more" href="">
+        <a
+          class="calendar-more"
+          href="http://nova-vue.em2046.com/"
+          target="_blank"
+        >
           <template>{{ dayjs(calendarDate).format('YYYY-MM') }}</template>
           <template>{{ '更多' }}</template>
           <NovaIconRight></NovaIconRight>
@@ -93,6 +101,16 @@ export default {
     },
     handlePanelChange(date) {
       console.log(dayjs(date).format('YYYY-MM-DD'));
+    },
+
+    handleClick(e) {
+      console.log('Click', e);
+    },
+    handleMouseenter(e) {
+      console.log(e);
+    },
+    handleMouseleave(e) {
+      console.log(e);
     }
   }
 };
@@ -101,7 +119,7 @@ export default {
 <style lang="less" scoped>
 .calendar-box {
   margin-top: 45px;
-  border: 2px solid #f90;
+  border: 2px solid #ff9900;
 }
 
 .calendar-title {
@@ -123,15 +141,21 @@ export default {
   font-size: 12px;
 
   a {
-    color: #29e;
+    color: #2299ee;
     text-decoration: none;
   }
 }
 
 .calendar-more {
-  display: flex;
+  display: inline-flex;
   justify-content: flex-end;
   align-items: center;
+  padding-left: 2px;
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(34, 153, 238, 0.5);
+  }
 }
 
 .calendar-num {
@@ -157,8 +181,8 @@ export default {
     display: inline-block;
     vertical-align: top;
     text-indent: 0;
-    color: #fff;
-    background-color: #333;
+    color: #ffffff;
+    background-color: #333333;
     text-align: center;
     padding: 0 1px;
     height: 16px;
@@ -168,7 +192,7 @@ export default {
   }
 
   .calendar-rest {
-    background: #fa0;
+    background: #ffaa00;
   }
 }
 

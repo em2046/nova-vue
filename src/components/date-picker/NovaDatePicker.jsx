@@ -1,11 +1,14 @@
 import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import Utils from '@/utils/utils';
-import Storage from '@/utils/storage';
+import Inventory from '@/utils/inventory';
 import Calendar from '@/utils/calendar';
 import locale from '@/mixin/locale';
 import NovaDropdown from '@/components/dropdown/NovaDropdown.jsx';
 import Month from './Month.jsx';
 import NovaIconDateRange from '@/icons/NovaIconDateRange.jsx';
+
+dayjs.extend(customParseFormat);
 
 export default {
   name: 'NovaDatePicker',
@@ -25,7 +28,7 @@ export default {
   props: {
     prefixedClass: {
       type: String,
-      default: `${Storage.prefix}-date-picker`
+      default: `${Inventory.prefix}-date-picker`
     },
     value: {
       type: [Date, Array],
@@ -36,7 +39,7 @@ export default {
       default: undefined
     },
     format: {
-      type: String,
+      type: [String, Array],
       default: Calendar.defaultFormat
     },
     disabled: {
@@ -241,12 +244,28 @@ export default {
         return placeholder[1];
       }
       return placeholder;
+    },
+    showFormat() {
+      const format = this.format;
+      if (Array.isArray(format)) {
+        return format[0];
+      }
+
+      return format;
+    },
+    parseFormatList() {
+      const format = this.format;
+      if (Array.isArray(format)) {
+        return format;
+      }
+
+      return [format];
     }
   },
   created() {
     this.init();
   },
-  destroyed() {
+  beforeDestroy() {
     this.closeDropdown(true);
   },
   methods: {
@@ -396,6 +415,69 @@ export default {
       }
       this.openEndImplement();
     },
+    handleStartKeydown(e) {
+      this.inputKeydown(e, this.value?.[0]);
+    },
+    handleEndKeydown(e) {
+      this.inputKeydown(e, this.value?.[1]);
+    },
+    inputKeydown(e, value) {
+      switch (e.key) {
+        case 'Enter':
+          if (value) {
+            this.close();
+          }
+          break;
+        case 'Esc': // IE/Edge
+        case 'Escape':
+          this.close();
+          break;
+      }
+    },
+    handleStartInput() {
+      const $startInput = this.$refs['startInput'];
+      const startInputValue = $startInput.value;
+      this.parseInput(startInputValue);
+    },
+    handleEndInput() {
+      const $endInput = this.$refs['endInput'];
+      const endInputValue = $endInput.value;
+      this.parseInput(endInputValue);
+    },
+    handleInputKeydown(e) {
+      this.inputKeydown(e, this.value);
+    },
+    handleInputInput() {
+      const $input = this.$refs['input'];
+      const inputValue = $input.value;
+      this.parseInput(inputValue);
+    },
+    parseInput(inputValue) {
+      const rangeName = this.rangeName;
+
+      let dateMoment;
+
+      const parseFormatList = this.parseFormatList;
+      for (let i = 0; i < parseFormatList.length; i++) {
+        const parsedDate = dayjs(inputValue, parseFormatList[i]);
+        if (parsedDate.isValid()) {
+          dateMoment = parsedDate;
+          break;
+        }
+      }
+
+      if (dateMoment) {
+        if (rangeName === null) {
+          this.changeDate(dateMoment, () => {
+            this.updateShowDate(dateMoment);
+          });
+        } else {
+          this.changeRange(dateMoment, () => {
+            this.updateShowDate(dateMoment);
+          });
+        }
+      }
+    },
     handleInputBlur(e) {
       clearTimeout(this.blurTimer);
 
@@ -437,10 +519,10 @@ export default {
       this.opened = false;
       this.closeDropdown();
     },
-    closeDropdown(notEmit) {
+    closeDropdown(skipEmit = false) {
       document.removeEventListener('click', this.handleOtherClick);
 
-      if (!notEmit) {
+      if (!skipEmit) {
         this.$emit('close', this.rangeName);
       }
     },
@@ -468,7 +550,7 @@ export default {
       if (!date) {
         return '';
       }
-      return dayjs(date).format(this.format);
+      return dayjs(date).format(this.showFormat);
     },
     dateToMoment(date) {
       if (!dayjs(date).isValid()) {
@@ -487,15 +569,26 @@ export default {
         $month.refreshDateList();
       });
     },
-    handleMomentSelect(dateMoment) {
+    changeDate: function(dateMoment, finishCallback = () => {}) {
+      const isDisabled = this.disabledDate.call(undefined, dateMoment.toDate());
+      if (isDisabled) {
+        return;
+      }
+
       this.$emit('update', dateMoment.toDate());
       this.$emit('change', dateMoment.toDate());
+
+      finishCallback.call(this);
+    },
+    handleMomentSelect(dateMoment) {
+      this.changeDate(dateMoment);
       setTimeout(() => {
         this.close();
       }, 50);
     },
-    handleRangeSelect(dateMoment) {
+    changeRange: function(dateMoment, finishCallback = () => {}) {
       const rangeIndex = this.rangeIndex;
+      const rangeName = this.rangeName;
 
       const oldStartDate = this.value[0];
       const oldEndDate = this.value[1];
@@ -504,18 +597,39 @@ export default {
       dateRange[rangeIndex] = dateMoment.toDate();
 
       const newStartDate = dateRange[0];
+      let newEndDate = dateRange[1];
 
-      if (rangeIndex === 0 && oldEndDate) {
+      if (rangeName === 'start' && oldEndDate) {
         if (dayjs(oldEndDate).isBefore(dayjs(newStartDate))) {
-          dateRange[1] = new Date(newStartDate);
+          newEndDate = new Date(newStartDate);
+        }
+      }
+      if (rangeName === 'end' && oldStartDate) {
+        if (dayjs(newEndDate).isBefore(dayjs(oldStartDate))) {
+          newEndDate = new Date(newStartDate);
         }
       }
 
-      this.$emit('update', dateRange);
+      const isDisabled = this.disabledDate.call(
+        undefined,
+        rangeName === 'start' ? newStartDate : newEndDate,
+        rangeName
+      );
+      if (isDisabled) {
+        return;
+      }
+
+      this.$emit('update', [newStartDate, newEndDate]);
       const rangeStart = newStartDate ? new Date(newStartDate) : null;
-      const rangeEnd = dateRange[1] ? new Date(dateRange[1]) : null;
+      const rangeEnd = newEndDate ? new Date(newEndDate) : null;
 
       this.$emit('change', [rangeStart, rangeEnd], this.rangeName);
+
+      finishCallback.call(this);
+    },
+    handleRangeSelect(dateMoment) {
+      const rangeIndex = this.rangeIndex;
+      this.changeRange(dateMoment);
 
       setTimeout(() => {
         if (rangeIndex === 0) {
@@ -583,7 +697,7 @@ export default {
         clearTimeout(this.blurTimer);
         clearTimeout(this.startBlurTimer);
         clearTimeout(this.endBlurTimer);
-      }, 1);
+      });
     },
     focus(rangeName) {
       if (!this.isRange) {
@@ -645,9 +759,15 @@ export default {
       handleEndBlur,
       handleEndFocus,
       handleEndClick,
+      handleEndKeydown,
+      handleEndInput,
+      handleInputKeydown,
+      handleInputInput,
       handleInputBlur,
       handleInputClick,
       handleInputFocus,
+      handleStartKeydown,
+      handleStartInput,
       handleStartBlur,
       handleStartFocus,
       handleStartClick,
@@ -691,7 +811,6 @@ export default {
           disabled,
           placeholder: datePlaceholder,
           autocomplete: 'off',
-          readonly: true,
           type: 'text'
         },
         domProps: {
@@ -699,6 +818,8 @@ export default {
         },
         class: `${prefixedClass}-input`,
         on: {
+          keydown: handleInputKeydown,
+          input: handleInputInput,
           blur: handleInputBlur,
           click: handleInputClick,
           focus: handleInputFocus
@@ -730,7 +851,6 @@ export default {
           disabled: startDisabled,
           placeholder: startPlaceholder,
           autocomplete: 'off',
-          readonly: true,
           type: 'text'
         },
         domProps: {
@@ -738,6 +858,8 @@ export default {
         },
         class: `${prefixedClass}-input`,
         on: {
+          keydown: handleStartKeydown,
+          input: handleStartInput,
           blur: handleStartBlur,
           click: handleStartClick,
           focus: handleStartFocus
@@ -766,7 +888,6 @@ export default {
           disabled: endDisabled,
           placeholder: endPlaceholder,
           autocomplete: 'off',
-          readonly: true,
           type: 'text'
         },
         domProps: {
@@ -774,6 +895,8 @@ export default {
         },
         class: `${prefixedClass}-input`,
         on: {
+          keydown: handleEndKeydown,
+          input: handleEndInput,
           blur: handleEndBlur,
           click: handleEndClick,
           focus: handleEndFocus

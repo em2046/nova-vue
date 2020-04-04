@@ -1,12 +1,12 @@
 import Utils from '@/utils/utils';
-import Storage from '@/utils/storage';
+import Inventory from '@/utils/inventory';
 
 export default {
   name: 'NovaDropdown',
   props: {
     prefixedClass: {
       type: String,
-      default: `${Storage.prefix}-dropdown`
+      default: `${Inventory.prefix}-dropdown`
     },
     appendToBody: {
       type: Boolean
@@ -33,22 +33,21 @@ export default {
   },
   computed: {
     dropdownStyle() {
-      if (!this.appendToBody) {
-        return {};
-      }
       const width = this.width;
-      return Object.assign(
-        {
-          width: `${width}px`
-        },
-        this.offset
-      );
+      const styleWidth = {
+        width: `${width}px`
+      };
+      if (!this.appendToBody) {
+        return styleWidth;
+      }
+
+      return Object.assign({}, styleWidth, this.offset);
     }
   },
   methods: {
     setPosition(targetDom) {
       let targetHeight = targetDom.offsetHeight;
-      let offset = Utils.getElementOffset(targetDom);
+      let offset = Utils.getElementPosition(targetDom);
       this.offset.left = `${offset.left}px`;
       this.offset.top = `${offset.top + targetHeight}px`;
     },
@@ -85,7 +84,7 @@ export default {
     };
 
     const dropdownContent = (
-      <transition name={`${Storage.prefix}-slide-up`}>
+      <transition name={`${Inventory.prefix}-slide-up`}>
         <div v-show={opened} {...dropdownProps}>
           {children}
         </div>
@@ -100,8 +99,8 @@ export default {
           </MountingPortal>
         </ClientOnly>
       );
-    } else {
-      return dropdownContent;
     }
+
+    return dropdownContent;
   }
 };

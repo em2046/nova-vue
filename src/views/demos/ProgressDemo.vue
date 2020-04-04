@@ -1,31 +1,53 @@
 <template>
   <section>
     <div class="box">
-      <NovaProgress :percent="0"></NovaProgress>
+      <NovaProgress
+        :percent="0"
+        :data-id="dataId"
+        @mouseenter="handleMouseenter"
+        @mouseleave="handleMouseleave"
+        @click="handleClick"
+      ></NovaProgress>
       <NovaProgress :percent="0.25"></NovaProgress>
       <NovaProgress :percent="0.5" :status="status"></NovaProgress>
       <div class="inline-block">
         <div>{{ status }}</div>
-        <button @click="toggleActive">
+        <NovaButton @click="toggleActive">
           {{ status === 'active' ? 'Set Normal' : 'Set Active' }}
-        </button>
+        </NovaButton>
       </div>
       <NovaProgress :percent="0.75" :show-info="showInfo"></NovaProgress>
       <div class="inline-block">
         <div>{{ showInfo }}</div>
-        <button @click="toggleShowInfo">Toggle ShowInfo</button>
+        <NovaButton @click="toggleShowInfo">Toggle ShowInfo</NovaButton>
       </div>
       <NovaProgress :percent="1"></NovaProgress>
     </div>
     <div class="box">
       <NovaProgress :percent="value"></NovaProgress>
-      <button @click="handleIncreasing">+</button>
-      <button @click="handleDecreasing">-</button>
+      <NovaButton :disabled="value >= 1" @click="handleIncreasing"
+        ><NovaIconAddCircle slot="icon"></NovaIconAddCircle>
+      </NovaButton>
+      <NovaButton :disabled="value <= 0" @click="handleDecreasing"
+        ><NovaIconRemoveCircle slot="icon"></NovaIconRemoveCircle>
+      </NovaButton>
     </div>
     <div class="box">
-      <NovaProgress type="circle" :percent="0" :width="width"></NovaProgress>
-      <button @click="widthIncreasing">+</button>
-      <button @click="widthDecreasing">-</button>
+      <NovaProgress
+        type="circle"
+        :percent="0"
+        :width="width"
+        :data-id="dataId"
+        @mouseenter="handleMouseenter"
+        @mouseleave="handleMouseleave"
+        @click="handleClick"
+      ></NovaProgress>
+      <NovaButton :disabled="width >= 200" @click="widthIncreasing"
+        ><NovaIconAddCircle slot="icon"></NovaIconAddCircle>
+      </NovaButton>
+      <NovaButton :disabled="width <= 0" @click="widthDecreasing">
+        <NovaIconRemoveCircle slot="icon"></NovaIconRemoveCircle>
+      </NovaButton>
       <NovaProgress
         class="has-guide"
         type="circle"
@@ -34,7 +56,7 @@
       ></NovaProgress>
       <div class="inline-block">
         <div>{{ linecap }}</div>
-        <button @click="toggleLinecap">Toggle Linecap</button>
+        <NovaButton @click="toggleLinecap">Toggle Linecap</NovaButton>
       </div>
       <NovaProgress type="circle" :percent="0.5"></NovaProgress>
       <NovaProgress
@@ -44,7 +66,7 @@
       ></NovaProgress>
       <div class="inline-block">
         <div>{{ showInfo }}</div>
-        <button @click="toggleShowInfo">Toggle ShowInfo</button>
+        <NovaButton @click="toggleShowInfo">Toggle ShowInfo</NovaButton>
       </div>
       <NovaProgress
         type="circle"
@@ -52,13 +74,21 @@
         :width="120"
         :stroke-width="strokeWidth"
       ></NovaProgress>
-      <button @click="strokeWidthIncreasing">+</button>
-      <button @click="strokeWidthDecreasing">-</button>
+      <NovaButton :disabled="strokeWidth >= 60" @click="strokeWidthIncreasing">
+        <NovaIconAddCircle slot="icon"></NovaIconAddCircle>
+      </NovaButton>
+      <NovaButton :disabled="strokeWidth <= 0" @click="strokeWidthDecreasing">
+        <NovaIconRemoveCircle slot="icon"></NovaIconRemoveCircle>
+      </NovaButton>
     </div>
     <div class="box">
       <NovaProgress type="circle" :percent="value"></NovaProgress>
-      <button @click="handleIncreasing">+</button>
-      <button @click="handleDecreasing">-</button>
+      <NovaButton :disabled="value >= 1" @click="handleIncreasing">
+        <NovaIconAddCircle slot="icon"></NovaIconAddCircle>
+      </NovaButton>
+      <NovaButton :disabled="value <= 0" @click="handleDecreasing">
+        <NovaIconRemoveCircle slot="icon"></NovaIconRemoveCircle>
+      </NovaButton>
     </div>
   </section>
 </template>
@@ -66,10 +96,16 @@
 <script>
 import NovaProgress from '@/components/progress/NovaProgress';
 import Utils from '@/utils/utils';
+import NovaButton from '@/components/button/NovaButton';
+import NovaIconAddCircle from '@/icons/NovaIconAddCircle';
+import NovaIconRemoveCircle from '@/icons/NovaIconRemoveCircle';
 
 export default {
   name: 'ProgressDemo',
   components: {
+    NovaIconRemoveCircle,
+    NovaIconAddCircle,
+    NovaButton,
     NovaProgress
   },
   data() {
@@ -79,10 +115,21 @@ export default {
       showInfo: false,
       linecap: 'round',
       width: 100,
-      strokeWidth: 10
+      strokeWidth: 10,
+      dataId: 42
     };
   },
   methods: {
+    handleClick(e) {
+      console.log('Click', e);
+      this.dataId = Utils.getRandomInt(0, 42);
+    },
+    handleMouseenter(e) {
+      console.log(e);
+    },
+    handleMouseleave(e) {
+      console.log(e);
+    },
     handleIncreasing() {
       this.value = Utils.numberLimit(this.value + 1 / 8, 0, 1);
     },
@@ -129,17 +176,47 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="less" scoped>
 .nova-progress-circle {
   margin-bottom: 10px;
   margin-right: 10px;
 }
 
 .has-guide {
-  background-image: url(../../assets/guide.svg);
+  &:before,
+  &:after {
+    width: 50px;
+    height: 50px;
+    border: 1px solid #29e;
+    content: '';
+    display: block;
+    position: absolute;
+    box-sizing: border-box;
+  }
+
+  &:before {
+    width: 50px;
+    height: 50px;
+    border: 1px solid #29e;
+    top: 0;
+    left: 0;
+  }
+
+  &:after {
+    width: 50px;
+    height: 50px;
+    border: 1px solid #29e;
+    bottom: 0;
+    right: 0;
+  }
 }
 
 .inline-block {
   display: inline-block;
+}
+
+.nova-button {
+  margin-right: 10px;
+  margin-bottom: 10px;
 }
 </style>
