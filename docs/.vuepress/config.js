@@ -1,4 +1,4 @@
-const path = require('path')
+const path = require('path');
 
 module.exports = {
   title: 'Nova Vue',
@@ -19,6 +19,11 @@ module.exports = {
       '/getting-started/',
       '/i18n/',
       {
+        title: '通用',
+        collapsable: false,
+        children: ['/button/', '/icon/']
+      },
+      {
         title: '数据录入',
         collapsable: false,
         children: [
@@ -37,11 +42,11 @@ module.exports = {
       {
         title: '反馈',
         collapsable: false,
-        children: ['/alert/']
+        children: ['/alert/', '/modal/', '/progress/']
       }
     ]
   },
   chainWebpack: config => {
-    config.resolve.alias.set('nova-vue', path.resolve(__dirname, '../..'),);
+    config.resolve.alias.set('nova-vue', path.resolve(__dirname, '../..'));
   }
 };
